@@ -34,7 +34,6 @@ const YogaCarousel = () => {
 
   return (
     <div className="max-w-4xl mx-auto relative">
-      <h2 className="text-2xl font-bold mb-4 text-center">Our Students in Action</h2>
       <div className="relative h-64 md:h-96 bg-gray-100">
         <div className="absolute inset-0 flex items-center justify-center">
           <Image 
