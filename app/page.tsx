@@ -135,20 +135,21 @@ export default function YogaLanding() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">What Our Clients Say</h2>
             <div className="grid gap-6 lg:grid-cols-3">
               {[
-                { name: 'Sarah M.', quote: 'Changed my life!', rating: 5 },
-                { name: 'John D.', quote: 'Best decision I ever made!', rating: 5 },
-                { name: 'Emily L.', quote: 'Incredible classes and instructor!', rating: 5 },
+                { name: 'Priya Sharma', quote: 'Transformed my practice!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test1.jpg' },
+                { name: 'Emma Wilson', quote: 'Best yoga classes ever!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test2.jpg' },
+                { name: 'Olivia Thompson', quote: 'Incredible instructor and community!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test3.jfif' },
               ].map((testimonial, index) => (
                 <Card key={index}>
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4 mb-4">
                       <Image
-                        src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/main_image.png?t=2024-09-18T07%3A45%3A34.062Z"
+                        src={testimonial.image}
                         alt={testimonial.name}
-                        width={50}
-                        height={50}
-                        style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
+                        width={100}
+                        height={100}
+                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                         className="rounded-full"
+                        unoptimized
                       />
                       <div>
                         <p className="font-semibold text-gray-800">{testimonial.name}</p>
