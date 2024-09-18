@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Facebook, Instagram, MessageCircle, Star, CheckCircle2 } from 'lucide-react'
+import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun } from 'lucide-react'
 import YogaCarousel from '@/components/ui/YogaCarousel'
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
 import StickyJoinForm from '@/components/ui/StickyJoinForm'
@@ -55,36 +55,90 @@ export default function YogaLanding() {
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">About Us</h2>
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-              <div className="space-y-4">
-                <p className="text-gray-700 dark:text-gray-300">
-                  At YogaHarmony, we believe in the transformative power of yoga. Our online classes focus on improving health, promoting relaxation, and enhancing flexibility. Whether you're a beginner or an advanced practitioner, we have a class that's perfect for you.
-                </p>
-                <p className="text-gray-700 dark:text-gray-300">
-                  Our mission is to bring the benefits of yoga to everyone, anywhere. We started these online classes to make yoga accessible, focusing on stress relief, physical fitness, and mental wellness.
-                </p>
-              </div>
-              <Card className="max-w-4xl">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-                    <div className="w-full md:w-1/2 flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden" style={{ height: '200px' }}>
-                      <Image
-                        src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/suman_masi_image.jpg"
-                        alt="Suman Arya"
-                        width={400}
-                        height={200}
-                        style={{ width: '100%', height: '200px', objectFit: 'cover', objectPosition: 'center' }}
-                        className="rounded-lg"
-                      />
-                    </div>
-                    <div className="w-full md:w-1/2">
-                      <h3 className="text-2xl font-bold text-gray-800">Suman Arya</h3>
-                      <p className="text-gray-600 dark:text-gray-400">Lead Yoga Instructor</p>
-                      <p className="mt-2 text-gray-700 dark:text-gray-300">
-                        Suman Arya is a certified yoga instructor with over 10 years of experience. She specializes in Hatha and Vinyasa yoga and is passionate about helping her students achieve balance in mind and body.
-                      </p>
-                    </div>
+              {/* Left column - text content */}
+              <Card className="p-6 h-full flex flex-col justify-between" style={{ minHeight: '660px' }}>
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Our Philosophy & Benefits of Yoga</h3>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <Leaf className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Transformative power of yoga for all levels</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Heart className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Holistic practice nurturing mind, body, and spirit</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Users className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Inclusive classes for all ages and fitness levels</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Clock className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Feel younger and more energetic</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Zap className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Increased flexibility and strength</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Brain className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Stress reduction and improved mental clarity</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Sun className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Investment in long-term health and well-being</span>
+                      </li>
+                    </ul>
                   </div>
-                </CardContent>
+                  
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Our Journey</h3>
+                    <p className="text-sm text-gray-700">Founded in 2010, YogaHarmony has grown from a local studio to a global online platform, connecting thousands of yoga enthusiasts worldwide.</p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Expert-Led Instruction</h3>
+                    <p className="text-sm text-gray-700 mb-2">Our lead instructor, Suman Arya, holds a 500-hour Yoga Teacher Certification.</p>
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <Shield className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Advanced expertise in yoga philosophy and techniques</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Shield className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Safety-focused instruction for all levels</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                
+                <div className="mt-8 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-600 italic">"Yoga is the journey of the self, through the self, to the self." - The Bhagavad Gita</p>
+                </div>
+              </Card>
+              
+              {/* Right column - image and details */}
+              <Card className="p-6 h-full flex flex-col justify-between" style={{ minHeight: '660px' }}>
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="w-full h-[500px] flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden">
+                    <Image
+                      src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/suman_masi_image.jpg"
+                      alt="Suman Arya"
+                      width={500}
+                      height={500}
+                      style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
+                      className="rounded-lg"
+                    />
+                  </div>
+                  <div className="w-full text-center">
+                    <h3 className="text-xl font-bold text-gray-800">Suman Arya</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">500-Hour Certified Yoga Instructor</p>
+                    <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                      With over a decade of experience, Suman Arya brings unparalleled expertise to every class, offering a transformative experience for all levels.
+                    </p>
+                  </div>
+                </div>
               </Card>
             </div>
           </div>
@@ -233,7 +287,7 @@ export default function YogaLanding() {
                   ]
                 },
               ].map((plan, index) => (
-                <Card key={index} className={plan.popular ? 'border-2 border-primary' : ''}>
+                <Card key={index} className={`flex flex-col ${plan.popular ? 'border-2 border-primary' : ''}`}>
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-gray-800">
                       {plan.title}
@@ -244,21 +298,23 @@ export default function YogaLanding() {
                       )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-4xl font-bold mb-2 text-gray-800">{plan.price}</p>
-                    {plan.originalPrice && (
-                      <p className="text-sm text-gray-500 mb-4">
-                        <span className="line-through">{plan.originalPrice}</span> Limited time offer!
-                      </p>
-                    )}
-                    <p className="text-sm text-gray-600 mb-4">Billed {plan.duration === '1 month' ? 'monthly' : `every ${plan.duration}`}</p>
-                    {plan.totalPrice && (
-                      <p className="text-lg font-semibold text-gray-700 mb-2">Total: {plan.totalPrice}</p>
-                    )}
-                    {plan.savings && (
-                      <p className="text-lg font-semibold text-green-600 mb-4">You save: {plan.savings}</p>
-                    )}
-                    <ul className="space-y-2 mb-4">
+                  <CardContent className="flex flex-col flex-grow">
+                    <div className="mb-4">
+                      <p className="text-4xl font-bold mb-2 text-gray-800">{plan.price}</p>
+                      {plan.originalPrice && (
+                        <p className="text-sm text-gray-500 mb-4">
+                          <span className="line-through">{plan.originalPrice}</span> Limited time offer!
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-600 mb-4">Billed {plan.duration === '1 month' ? 'monthly' : `every ${plan.duration}`}</p>
+                      {plan.totalPrice && (
+                        <p className="text-lg font-semibold text-gray-700 mb-2">Total: {plan.totalPrice}</p>
+                      )}
+                      {plan.savings && (
+                        <p className="text-lg font-semibold text-green-600 mb-4">You save: {plan.savings}</p>
+                      )}
+                    </div>
+                    <ul className="space-y-2 mb-4 flex-grow">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center text-gray-700 dark:text-gray-300">
                           <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
@@ -266,7 +322,7 @@ export default function YogaLanding() {
                         </li>
                       ))}
                     </ul>
-                    <Button className="w-full">Subscribe Now</Button>
+                    <Button className="w-full mt-auto">Subscribe Now</Button>
                   </CardContent>
                 </Card>
               ))}
