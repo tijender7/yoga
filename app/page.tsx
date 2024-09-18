@@ -87,6 +87,7 @@ export default function YogaLanding() {
                       alt="Suman Arya"
                       width={100}
                       height={100}
+                      style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                       className="rounded-full"
                     />
                     <div>
@@ -141,6 +142,7 @@ export default function YogaLanding() {
                         alt={testimonial.name}
                         width={50}
                         height={50}
+                        style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                         className="rounded-full"
                       />
                       <div>
@@ -268,7 +270,7 @@ export default function YogaLanding() {
                 </Link>
                 <Link href="#" className="text-gray-500 hover:text-gray-700">
                   <MessageCircle className="w-6 h-6" />
-                  <span className="sr-only">WhatsApp</span>
+                  <span className="sr-only">MessageCircle</span>
                 </Link>
               </div>
             </div>

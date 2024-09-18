@@ -56,7 +56,7 @@ const FlowingYogaEnergyBackground = () => {
             cy={50 + wave(i * 5, 10, 0.2, i * 0.2)}
             r="0.5"
             fill="white"
-            opacity={0.5 + Math.sin(time + i) * 0.5}
+            opacity={Math.round((0.5 + Math.sin(time + i) * 0.5) * 100) / 100}
           />
         ))}
       </svg>
