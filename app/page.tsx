@@ -31,12 +31,13 @@ export default function YogaLanding() {
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-white mb-4">
                 Transform Your Mind & Body with Yoga
               </h1>
-              <p className="max-w-[600px] text-zinc-200 md:text-xl mx-auto mb-6">
-                Join online yoga classes tailored for every level, from beginners to advanced.
+              <p className="max-w-[800px] text-zinc-200 md:text-xl mx-auto mb-6">
+                Join our tailored classes for all levels and invest in your future health.
+                Age gracefully with yoga - your key to a vibrant, pain-free life.
               </p>
               <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-                <Button size="lg">Start Your Free Trial</Button>
-                <Button variant="outline" size="lg">See Class Schedule</Button>
+                <Button size="lg">Start Your Journey</Button>
+                <Button variant="outline" size="lg">Explore Classes</Button>
               </div>
             </div>
           </div>
