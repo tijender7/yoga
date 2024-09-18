@@ -23,44 +23,47 @@ export default function YogaLanding() {
         </nav>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 relative bg-gradient-to-br from-purple-800 to-indigo-900 overflow-hidden">
+        <section className="w-full py-18 md:py-36 lg:py-48 xl:py-72 relative bg-gradient-to-br from-purple-800 to-indigo-900 overflow-hidden">
           <FlowingYogaEnergyBackground />
           <div className="container px-4 md:px-6 relative z-10">
-            <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-white">
-                    Transform Your Mind & Body with Yoga
-                  </h1>
-                  <p className="max-w-[600px] text-zinc-200 md:text-xl">
-                    Join online yoga classes tailored for every level, from beginners to advanced.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button size="lg">Start Your Free Trial</Button>
-                  <Button variant="outline" size="lg">See Class Schedule</Button>
-                </div>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-white mb-4">
+                Transform Your Mind & Body with Yoga
+              </h1>
+              <p className="max-w-[600px] text-zinc-200 md:text-xl mx-auto mb-6">
+                Join online yoga classes tailored for every level, from beginners to advanced.
+              </p>
+              <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
+                <Button size="lg">Start Your Free Trial</Button>
+                <Button variant="outline" size="lg">See Class Schedule</Button>
               </div>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Join Our Community</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form>
-                    <div className="grid gap-4">
-                      <Input placeholder="Name" />
-                      <Input placeholder="Email" type="email" />
-                      <Input placeholder="Interest (e.g., Beginner Yoga)" />
-                      <Button type="submit">Join Now</Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </section>
         
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+        <section className="w-full py-10 bg-white">
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-6 text-center text-black">Join Our Community</h2>
+                <form className="flex flex-col md:flex-row md:items-end md:space-x-4">
+                  <div className="flex-1 mb-4 md:mb-0">
+                    <Input placeholder="Name" className="w-full" />
+                  </div>
+                  <div className="flex-1 mb-4 md:mb-0">
+                    <Input placeholder="Email" type="email" className="w-full" />
+                  </div>
+                  <div className="flex-1 mb-4 md:mb-0">
+                    <Input placeholder="Interest (e.g., Beginner Yoga)" className="w-full" />
+                  </div>
+                  <Button type="submit" className="w-full md:w-auto">Join Now</Button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <section className="w-full py-10 md:py-20 lg:py-28 bg-gray-100">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Our Students in Action</h2>
             <YogaCarousel />
