@@ -7,6 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Facebook, Instagram, MessageCircle, Star, CheckCircle2 } from 'lucide-react'
 import YogaCarousel from '@/components/ui/YogaCarousel'
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
+import StickyJoinForm from '@/components/ui/StickyJoinForm'
 
 export default function YogaLanding() {
   return (
@@ -41,27 +42,7 @@ export default function YogaLanding() {
           </div>
         </section>
         
-        <section className="w-full py-10 bg-white">
-          <div className="container px-4 md:px-6 mx-auto">
-            <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6 text-center text-black">Join Our Community</h2>
-                <form className="flex flex-col md:flex-row md:items-end md:space-x-4">
-                  <div className="flex-1 mb-4 md:mb-0">
-                    <Input placeholder="Name" className="w-full" />
-                  </div>
-                  <div className="flex-1 mb-4 md:mb-0">
-                    <Input placeholder="Email" type="email" className="w-full" />
-                  </div>
-                  <div className="flex-1 mb-4 md:mb-0">
-                    <Input placeholder="Interest (e.g., Beginner Yoga)" className="w-full" />
-                  </div>
-                  <Button type="submit" className="w-full md:w-auto">Join Now</Button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
+        <StickyJoinForm />
         
         <section className="w-full py-10 md:py-20 lg:py-28 bg-gray-100">
           <div className="container px-4 md:px-6">
@@ -205,16 +186,78 @@ export default function YogaLanding() {
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
             <div className="grid gap-6 lg:grid-cols-3">
               {[
-                { title: 'Monthly', price: '$49', features: ['Unlimited access to all classes', 'Personal dashboard', '24/7 support'] },
-                { title: 'Annual', price: '$399', features: ['2 months free', 'Unlimited access to all classes', 'Personal dashboard', '24/7 support', 'Exclusive workshops'] },
-                { title: 'Pay-as-you-go', price: '$10', features: ['Access to individual classes', 'No commitment', 'Try different styles'] },
+                { 
+                  title: 'Monthly', 
+                  price: '$55', 
+                  originalPrice: '$90',
+                  duration: '1 month',
+                  features: [
+                    'All Inclusive',
+                    '5 days a week, 1 hour sessions',
+                    'Zoom sessions with privacy',
+                    'Hardcore stretching',
+                    'Flexibility training',
+                    'Strength training',
+                    'Posture fix',
+                    'Personalized feel',
+                    'Price increases to $90 after first month'
+                  ]
+                },
+                { 
+                  title: 'Annual', 
+                  price: '$55/month', 
+                  duration: '12 months',
+                  totalPrice: '$660',
+                  savings: '$420',
+                  popular: true,
+                  features: [
+                    'All Inclusive',
+                    'All features of Monthly plan',
+                    'Best value for money',
+                    'Total cost: $660 for 12 months',
+                    'Save $420 compared to monthly plan'
+                  ]
+                },
+                { 
+                  title: '6 Months', 
+                  price: '$70/month', 
+                  duration: '6 months',
+                  totalPrice: '$420',
+                  savings: '$120',
+                  features: [
+                    'All Inclusive',
+                    'All features of Monthly plan',
+                    'Discounted rate for 6 months',
+                    'Total cost: $420 for 6 months',
+                    'Save $120 compared to monthly plan'
+                  ]
+                },
               ].map((plan, index) => (
-                <Card key={index}>
+                <Card key={index} className={plan.popular ? 'border-2 border-primary' : ''}>
                   <CardHeader>
-                    <CardTitle className="text-gray-800">{plan.title}</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-gray-800">
+                      {plan.title}
+                      {plan.popular && (
+                        <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-primary rounded-full">
+                          Most Popular
+                        </span>
+                      )}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-4xl font-bold mb-4 text-gray-800">{plan.price}</p>
+                    <p className="text-4xl font-bold mb-2 text-gray-800">{plan.price}</p>
+                    {plan.originalPrice && (
+                      <p className="text-sm text-gray-500 mb-4">
+                        <span className="line-through">{plan.originalPrice}</span> Limited time offer!
+                      </p>
+                    )}
+                    <p className="text-sm text-gray-600 mb-4">Billed {plan.duration === '1 month' ? 'monthly' : `every ${plan.duration}`}</p>
+                    {plan.totalPrice && (
+                      <p className="text-lg font-semibold text-gray-700 mb-2">Total: {plan.totalPrice}</p>
+                    )}
+                    {plan.savings && (
+                      <p className="text-lg font-semibold text-green-600 mb-4">You save: {plan.savings}</p>
+                    )}
                     <ul className="space-y-2 mb-4">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center text-gray-700 dark:text-gray-300">
