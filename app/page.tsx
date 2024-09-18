@@ -2,9 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun } from 'lucide-react'
+import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun, Sunrise, Sunset, Moon, Baby, Dumbbell, Flame } from 'lucide-react'
 import YogaCarousel from '@/components/ui/YogaCarousel'
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
 import StickyJoinForm from '@/components/ui/StickyJoinForm'
@@ -89,6 +89,18 @@ export default function YogaLanding() {
                         <Sun className="w-5 h-5 mr-2 text-primary" />
                         <span className="text-sm text-gray-700">Investment in long-term health and well-being</span>
                       </li>
+                      <li className="flex items-start">
+                        <Sunrise className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Improved posture and balance</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Sunset className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Better sleep quality and relaxation</span>
+                      </li>
+                      <li className="flex items-start">
+                        <Dumbbell className="w-5 h-5 mr-2 text-primary" />
+                        <span className="text-sm text-gray-700">Enhanced muscle tone and strength</span>
+                      </li>
                     </ul>
                   </div>
                   
@@ -114,7 +126,7 @@ export default function YogaLanding() {
                 </div>
                 
                 <div className="mt-8 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600 italic">"Yoga is the journey of the self, through the self, to the self." - The Bhagavad Gita</p>
+                  <p className="text-sm text-gray-600 italic">"Yoga is not just exercise, it's an investment in your lifelong health and well-being."</p>
                 </div>
               </Card>
               
@@ -147,18 +159,74 @@ export default function YogaLanding() {
         <section id="services" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Yoga Classes Tailored for You</h2>
-            <div className="grid gap-6 lg:grid-cols-3">
-              {['Beginner Yoga', 'Advanced Yoga', 'Stress Relief Yoga'].map((service) => (
-                <Card key={service}>
+            <p className="text-xl text-center text-gray-600 mb-12">Transform your life with our specialized yoga programs</p>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  title: 'Stress Relief Yoga',
+                  description: 'Struggling with daily stress and anxiety?',
+                  icon: Brain,
+                  benefits: ['Reduce stress levels', 'Improve mental clarity', 'Enhance emotional well-being'],
+                  forWhom: 'Perfect for busy professionals and anyone feeling overwhelmed'
+                },
+                {
+                  title: 'Flexibility & Strength',
+                  description: 'Feeling stiff or weak?',
+                  icon: Dumbbell,
+                  benefits: ['Increase flexibility', 'Build lean muscle', 'Improve posture'],
+                  forWhom: 'Ideal for those looking to enhance physical fitness'
+                },
+                {
+                  title: 'Mindful Meditation',
+                  description: 'Trouble focusing or sleeping?',
+                  icon: Moon,
+                  benefits: ['Enhance concentration', 'Improve sleep quality', 'Cultivate inner peace'],
+                  forWhom: 'Great for anyone seeking mental balance and relaxation'
+                },
+                {
+                  title: 'Gentle Yoga for Seniors',
+                  description: 'Concerned about joint health and mobility?',
+                  icon: Heart,
+                  benefits: ['Enhance mobility', 'Reduce joint pain', 'Improve overall well-being'],
+                  forWhom: 'Tailored for seniors and those with limited mobility'
+                },
+                {
+                  title: 'Prenatal Yoga',
+                  description: 'Expecting and want to stay active safely?',
+                  icon: Baby,
+                  benefits: ['Ease pregnancy discomforts', 'Prepare for childbirth', 'Connect with your baby'],
+                  forWhom: 'Designed for expectant mothers at all stages of pregnancy'
+                },
+                {
+                  title: 'Weight Management Yoga',
+                  description: 'Struggling with weight issues?',
+                  icon: Flame,
+                  benefits: ['Boost metabolism', 'Improve body composition', 'Increase energy levels'],
+                  forWhom: 'Perfect for those on a weight loss or maintenance journey'
+                },
+              ].map((classType, index) => (
+                <Card key={index} className="flex flex-col h-full">
                   <CardHeader>
-                    <CardTitle className="text-gray-800">{service}</CardTitle>
+                    <div className="flex items-center space-x-4">
+                      <div className="p-2 bg-primary rounded-full">
+                        <classType.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl font-bold">{classType.title}</CardTitle>
+                    </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      Perfect for those who want to {service.toLowerCase() === 'beginner yoga' ? 'start their yoga journey' : service.toLowerCase() === 'advanced yoga' ? 'deepen their practice' : 'find inner peace'}.
-                    </p>
-                    <Button className="mt-4">Learn More</Button>
+                  <CardContent className="flex-grow">
+                    <p className="text-gray-600 mb-4 font-semibold">{classType.description}</p>
+                    <h4 className="font-semibold mb-2">Benefits:</h4>
+                    <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
+                      {classType.benefits.map((benefit, i) => (
+                        <li key={i}>{benefit}</li>
+                      ))}
+                    </ul>
+                    <p className="text-sm text-gray-500 italic">{classType.forWhom}</p>
                   </CardContent>
+                  <CardFooter>
+                    <Button className="w-full">Join This Program</Button>
+                  </CardFooter>
                 </Card>
               ))}
             </div>
