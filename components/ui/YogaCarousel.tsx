@@ -1,46 +1,56 @@
 // File: components/YogaCarousel.tsx
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const YogaCarousel: React.FC = () => {
-  const carouselRef = useRef<HTMLDivElement>(null);
+const YogaCarousel = () => {
+  const [images, setImages] = useState<string[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
-
-    const scrollCarousel = () => {
-      if (carousel.scrollLeft >= (carousel.scrollWidth - carousel.clientWidth)) {
-        carousel.scrollLeft = 0;
-      } else {
-        carousel.scrollLeft += 1;
-      }
-    };
-
-    const intervalId = setInterval(scrollCarousel, 20);
-
-    return () => clearInterval(intervalId);
+    const imageUrls = Array.from({ length: 13 }, (_, i) => 
+      `https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/student${i}.jpeg`
+    );
+    setImages(imageUrls);
   }, []);
 
-  const imageUrl = "https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/main_image.png?t=2024-09-18T07%3A45%3A34.062Z";
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images]);
+
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  if (images.length === 0) return null;
 
   return (
-    <div className="w-full overflow-hidden">
-      <div ref={carouselRef} className="flex whitespace-nowrap">
-        {[...Array(10)].map((_, index) => (
-          <div key={index} className="inline-block mr-4">
-            <Image
-              src={imageUrl}
-              alt={`Student doing yoga ${index + 1}`}
-              width={300}
-              height={200}
-              className="rounded-lg"
-            />
-          </div>
-        ))}
+    <div className="max-w-4xl mx-auto relative">
+      <h2 className="text-2xl font-bold mb-4 text-center">Our Students in Action</h2>
+      <div className="relative h-64 md:h-96 bg-gray-100">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image 
+            src={images[currentIndex]} 
+            alt={`Student ${currentIndex}`} 
+            layout="fill"
+            objectFit="contain"
+          />
+        </div>
       </div>
+      <button onClick={prevSlide} className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2">
+        &lt;
+      </button>
+      <button onClick={nextSlide} className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2">
+        &gt;
+      </button>
     </div>
   );
 };
