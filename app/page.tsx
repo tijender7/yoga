@@ -79,25 +79,27 @@ export default function YogaLanding() {
                   Our mission is to bring the benefits of yoga to everyone, anywhere. We started these online classes to make yoga accessible, focusing on stress relief, physical fitness, and mental wellness.
                 </p>
               </div>
-              <Card>
+              <Card className="max-w-4xl">
                 <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/main_image.png?t=2024-09-18T07%3A45%3A34.062Z"
-                      alt="Suman Arya"
-                      width={100}
-                      height={100}
-                      style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
-                      className="rounded-full"
-                    />
-                    <div>
+                  <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div className="w-full md:w-1/2 flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden" style={{ height: '200px' }}>
+                      <Image
+                        src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/suman_masi_image.jpg"
+                        alt="Suman Arya"
+                        width={400}
+                        height={200}
+                        style={{ width: '100%', height: '200px', objectFit: 'cover', objectPosition: 'center' }}
+                        className="rounded-lg"
+                      />
+                    </div>
+                    <div className="w-full md:w-1/2">
                       <h3 className="text-2xl font-bold text-gray-800">Suman Arya</h3>
                       <p className="text-gray-600 dark:text-gray-400">Lead Yoga Instructor</p>
+                      <p className="mt-2 text-gray-700 dark:text-gray-300">
+                        Suman Arya is a certified yoga instructor with over 10 years of experience. She specializes in Hatha and Vinyasa yoga and is passionate about helping her students achieve balance in mind and body.
+                      </p>
                     </div>
                   </div>
-                  <p className="mt-4 text-gray-700 dark:text-gray-300">
-                    Suman Arya is a certified yoga instructor with over 10 years of experience. She specializes in Hatha and Vinyasa yoga and is passionate about helping her students achieve balance in mind and body.
-                  </p>
                 </CardContent>
               </Card>
             </div>
