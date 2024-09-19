@@ -76,3 +76,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add this to your global CSS or component-specific CSS module */
+.Toaster__toast-icon {
+  color: #22c55e !important;
+  font-size: 1.5rem !important;
+}

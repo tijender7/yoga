@@ -111,3 +111,13 @@ html {
     transform: translateY(0);
   }
 }
+
+.custom-toast {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.custom-toast [data-icon] {
+  color: #22c55e !important;
+  font-size: 1.5rem !important;
+}

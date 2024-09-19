@@ -9,7 +9,8 @@ import YogaCarousel from '@/components/ui/YogaCarousel'
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
 import StickyJoinForm from '@/components/ui/StickyJoinForm'
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation'
-
+import BookFreeClass from '@/components/ui/BookFreeClass'
+import { Toaster } from 'sonner'
 
 export default function YogaLanding() {
   return (
@@ -424,7 +425,7 @@ export default function YogaLanding() {
               <p className="max-w-[600px] text-gray-700 md:text-xl dark:text-gray-300 mx-auto mb-8">
                 Experience the benefits of our yoga classes with no commitment. Join our free Saturday trial class and see the difference for yourself.
               </p>
-              <Button size="lg">Book Your Free Class Now</Button>
+              <BookFreeClass />
             </div>
           </section>
         </ScrollAnimation>
