@@ -34,6 +34,7 @@ const countryCodes = [
 ]
 
 export default function BookFreeClass() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [countryCode, setCountryCode] = useState('+1')
@@ -44,14 +45,17 @@ export default function BookFreeClass() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setNotification(null) // Reset notification
+    setNotification(null)
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+    if (!name.trim()) {
+      setNotification({ type: 'error', message: "Please provide your name." })
+      return
+    }
     if (!email || !emailRegex.test(email)) {
       setNotification({ type: 'error', message: "Please provide a valid email address." })
       return
     }
-    // Here you would typically send the data to your backend
-    console.log('Submitted:', { email, phone: phone ? `${countryCode}${phone}` : 'Not provided' })
+    console.log('Submitted:', { name, email, phone: phone ? `${countryCode}${phone}` : 'Not provided' })
     setIsDialogOpen(false)
     showConfirmation()
   }
@@ -116,6 +120,19 @@ export default function BookFreeClass() {
               </div>
             )}
             <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                  Name*
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-100 border-gray-300 focus:border-primary focus:ring-primary"
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email*
