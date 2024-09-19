@@ -26,9 +26,10 @@ interface Notification {
 }
 
 const countryCodes = [
-  { code: '+1', country: 'US/Can' },
+  { code: '+1', country: 'US/CAN' },
   { code: '+44', country: 'UK' },
-  { code: '+91', country: 'India' },
+  { code: '+91', country: 'IND' },
+  { code: '+49', country: 'GER' },
   // Add more country codes as needed
 ]
 
@@ -57,7 +58,7 @@ export default function BookFreeClass() {
 
   const showConfirmation = () => {
     setIsConfettiActive(true)
-    toast.success("You're all set for Saturday's class! We've sent the class link to your email. Can't wait to see you there!", {
+    toast.success("You're all set for Weekend's class! We've sent the class link to your email. Can't wait to see you there!", {
       duration: 5000,
       position: 'bottom-right',
       className: 'custom-toast',
@@ -102,7 +103,7 @@ export default function BookFreeClass() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white text-gray-800 rounded-lg shadow-lg">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-gray-900">Book Your Free Saturday Class</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-gray-900">Book Your Free Weekend Class</DialogTitle>
               <DialogDescription className="text-gray-600">
                 Enter your details below to secure your spot in our upcoming free yoga session.
               </DialogDescription>
@@ -140,7 +141,7 @@ export default function BookFreeClass() {
                     <SelectContent>
                       {countryCodes.map((country) => (
                         <SelectItem key={country.code} value={country.code}>
-                          {country.code}
+                          {country.code} ({country.country})
                         </SelectItem>
                       ))}
                     </SelectContent>
