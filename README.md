@@ -34,3 +34,45 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+   Add-Content -Path README.md -Value @"
+   
+   ## Project Structure
+   
+   - frontend/: Next.js frontend
+   - backend/: Python backend
+   - docker-compose.yml: Docker configuration
+   "@
+
+
+
+
+   ## Project Structure
+
+- frontend/: Next.js frontend application
+- backend/: Python backend application
+- docker-compose.yml: Docker configuration for both services
+
+## Setup Instructions
+
+1. Clone the repository
+2. Set up the frontend:
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
+3. Set up the backend:
+   ```
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   pip install -r requirements.txt
+   python app/main.py
+   ```
+4. To run both services using Docker:
+   ```
+   docker-compose up --build
+   ```
