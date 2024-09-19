@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, AlertCircle, Check, Loader2 } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { AuthError } from '@supabase/supabase-js'
 
 export default function AdvancedAuthTabs() {
   const [activeTab, setActiveTab] = useState('signup')
@@ -41,42 +43,63 @@ export default function AdvancedAuthTabs() {
     const formData = new FormData(event.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
-    const confirmPassword = formData.get('confirmPassword') as string
+    const username = formData.get('username') as string
 
-    if (!email || !password) {
-      setAlert({ type: 'error', message: 'Please fill in all required fields.' })
+    try {
+      if (activeTab === 'signup') {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+        })
+        if (error) throw error
+
+        // Only proceed with profile creation if signUp was successful
+        if (data.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              username: username,
+            })
+          if (profileError) throw profileError
+        }
+
+        setAlert({ type: 'success', message: 'Check your email for the confirmation link.' })
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) throw error
+        setAlert({ type: 'success', message: 'Successfully signed in!' })
+        // Redirect to home page after successful sign in
+        window.location.href = '/'
+      }
+    } catch (error) {
+      if (error instanceof AuthError) {
+        setAlert({ type: 'error', message: error.message })
+      } else {
+        setAlert({ type: 'error', message: 'An unexpected error occurred' })
+      }
+    } finally {
       setIsLoading(false)
-      return
     }
-
-    if (activeTab === 'signup') {
-      if (password !== confirmPassword) {
-        setAlert({ type: 'error', message: 'Passwords do not match.' })
-        setIsLoading(false)
-        return
-      }
-      if (passwordStrength < 75) {
-        setAlert({ type: 'error', message: 'Please choose a stronger password.' })
-        setIsLoading(false)
-        return
-      }
-      if (!agreeToTerms) {
-        setAlert({ type: 'error', message: 'Please agree to the Terms of Service.' })
-        setIsLoading(false)
-        return
-      }
-    }
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    setAlert({ type: 'success', message: `${activeTab === 'signup' ? 'Sign up' : 'Sign in'} successful!` })
-    setIsLoading(false)
   }
 
-  const handleGoogleSignUp = () => {
-    setAlert({ type: 'info', message: 'Google sign up initiated. Redirecting...' })
-    // Implement actual Google sign up logic here
+  const handleGoogleSignUp = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      })
+      if (error) throw error
+      if (data) {
+        setAlert({ type: 'success', message: 'Google sign up initiated. Redirecting...' })
+        // The user will be redirected to Google's OAuth page
+      }
+    } catch (error) {
+      if (error instanceof AuthError) {
+        setAlert({ type: 'error', message: error.message })
+      } else {
+        setAlert({ type: 'error', message: 'An unexpected error occurred during Google sign-up' })
+      }
+    }
   }
 
   const handleForgotPassword = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -88,10 +111,17 @@ export default function AdvancedAuthTabs() {
       setIsLoading(false)
       return
     }
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setAlert({ type: 'success', message: 'Password reset instructions sent to your email.' })
-    setIsLoading(false)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      if (error) throw error
+      setAlert({ type: 'success', message: 'Password reset instructions sent to your email.' })
+    } catch (error) {
+      setAlert({ type: 'error', message: 'Error sending reset instructions. Please try again.' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleResetPassword = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -120,6 +150,21 @@ export default function AdvancedAuthTabs() {
     setIsLoading(false)
     setActiveTab('signin')
   }
+
+  // This should be in a useEffect or similar in your main layout or app component
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN') {
+        // User has signed in
+        setAlert({ type: 'success', message: 'Successfully signed in with Google!' })
+        // Update your app state, redirect user, etc.
+      }
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [])
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6 bg-white p-8 rounded-lg shadow-md">
@@ -183,6 +228,10 @@ export default function AdvancedAuthTabs() {
               <Label htmlFor="signup-confirm-password" className="text-sm font-medium text-gray-700">Confirm Password</Label>
               <Input id="signup-confirm-password" name="confirmPassword" type="password" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="signup-username" className="text-sm font-medium text-gray-700">Username</Label>
+              <Input id="signup-username" name="username" type="text" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
+            </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)} />
               <label
@@ -204,9 +253,9 @@ export default function AdvancedAuthTabs() {
             </Button>
           </form>
           <div className="mt-4">
-            <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-center" onClick={handleGoogleSignUp}>
+            <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-center" onClick={handleGoogleSignUp} disabled>
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" fill="#4285F4"/></svg>
-              Sign up with Google
+              Sign up with Google (Coming Soon)
             </Button>
           </div>
         </TabsContent>
@@ -297,7 +346,7 @@ export default function AdvancedAuthTabs() {
           ) : alert.type === 'success' ? (
             <Check className="h-4 w-4 text-green-500" />
           ) : (
-            <AlertCircle className="h-4 w-4 text-black" />
+            <AlertCircle className="h-4 w-4 text-[#4285F4]" />
           )}
           <AlertTitle className="text-gray-900 font-semibold">{alert.type === 'error' ? 'Error' : alert.type === 'success' ? 'Success' : 'Info'}</AlertTitle>
           <AlertDescription className="text-gray-700">{alert.message}</AlertDescription>

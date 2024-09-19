@@ -9,7 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, CreditCard, LogOut } from 'lucide-react'
+import { User, CreditCard, LogOut, Loader2 } from 'lucide-react'
+import { useUser } from '@/hooks/useUser'
+import { supabase } from '@/lib/supabase'
+import BookFreeClass from './BookFreeClass'
 
 // GlowButton component
 function GlowButton() {
@@ -39,7 +42,11 @@ function GlowButton() {
 }
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Placeholder state for user login
+  const { user, loading } = useUser()
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
 
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center bg-white shadow-sm">
@@ -51,7 +58,11 @@ export default function Header() {
         <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#services">Services</Link>
         <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#pricing">Pricing</Link>
         <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#contact">Contact</Link>
-        {isLoggedIn ? (
+        {loading ? (
+          <Button variant="ghost" size="icon">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </Button>
+        ) : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -68,7 +79,7 @@ export default function Header() {
                 <CreditCard className="mr-2 h-4 w-4" />
                 <span>Billing Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Logout</span>
               </DropdownMenuItem>
@@ -81,7 +92,7 @@ export default function Header() {
             </Button>
           </Link>
         )}
-        <GlowButton />
+        <BookFreeClass buttonText="Start Free Trial" />
       </nav>
     </header>
   )

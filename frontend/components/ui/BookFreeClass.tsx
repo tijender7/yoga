@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/Label"
+import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ReactConfetti from 'react-confetti'
 import { useEffect, useRef } from 'react'
@@ -33,12 +33,12 @@ const countryCodes = [
   // Add more country codes as needed
 ]
 
-export default function BookFreeClass() {
+export default function BookFreeClass({ buttonText = "Book Your Free Class" }: { buttonText?: string }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [countryCode, setCountryCode] = useState('+1')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [notification, setNotification] = useState<Notification | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [isConfettiActive, setIsConfettiActive] = useState(false)
@@ -103,7 +103,9 @@ export default function BookFreeClass() {
       <div className="relative">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">Book Your Free Class Now</Button>
+            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+              {buttonText}
+            </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px] bg-white text-gray-800 rounded-lg shadow-lg">
             <DialogHeader>

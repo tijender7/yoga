@@ -76,3 +76,52 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
    ```
    docker-compose up --build
    ```
+
+# YogaHarmony
+
+YogaHarmony is a web application for yoga enthusiasts to book classes and manage their yoga journey.
+
+## Important Notes for Developers
+
+### Password Reset Functionality
+
+During local development, the password reset functionality uses the local server URL. This is important for testing the feature in a development environment.
+
+**Key Point:** In the Supabase project settings, set the "Reset Password URL" to:
+```
+http://localhost:3000/reset-password
+```
+
+**Why this is important:**
+1. Local Testing: This allows you to test the password reset flow on your local machine.
+2. Development-Production Parity: It ensures that the password reset feature works similarly in both development and production environments.
+3. Security: It prevents accidentally sending users to a non-existent or incorrect URL during the password reset process.
+
+**Remember:** Before deploying to production, update the "Reset Password URL" in Supabase project settings to your actual domain, e.g., `https://www.yogaharmony.com/reset-password`.
+
+### Environment Variables
+
+Ensure that you have set up the following environment variables in your `.env.local` file:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Replace `your_supabase_project_url` and `your_supabase_anon_key` with your actual Supabase project details.
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables as mentioned above
+4. Run the development server: `npm run dev`
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Contributing
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
