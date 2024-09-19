@@ -11,21 +11,12 @@ import StickyJoinForm from '@/components/ui/StickyJoinForm'
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation'
 import BookFreeClass from '@/components/ui/BookFreeClass'
 import { Toaster } from 'sonner'
+import Header from '@/components/ui/Header'
 
 export default function YogaLanding() {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="px-4 lg:px-6 h-14 flex items-center bg-white shadow-sm">
-        <Link className="flex items-center justify-center" href="#">
-          <span className="text-2xl font-bold text-primary">YogaHarmony</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-sm font-medium text-gray-700 hover:underline underline-offset-4" href="#about">About</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:underline underline-offset-4" href="#services">Services</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:underline underline-offset-4" href="#pricing">Pricing</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:underline underline-offset-4" href="#contact">Contact</Link>
-        </nav>
-      </header>
+      <Header />
       <main className="flex-1">
         <ScrollAnimation>
           <section className="w-full py-18 md:py-36 lg:py-48 xl:py-72 relative bg-gradient-to-br from-purple-800 to-indigo-900 overflow-hidden">
