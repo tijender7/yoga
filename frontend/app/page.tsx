@@ -485,7 +485,6 @@ export default function YogaLanding() {
           </div>
         </div>
       </footer>
-      <Toaster />
     </div>
   )
 }
