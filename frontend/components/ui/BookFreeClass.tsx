@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ReactConfetti from 'react-confetti'
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-
+import { supabase } from '@/lib/supabase'
 
 type NotificationType = 'success' | 'error' | null;
 
@@ -42,22 +42,60 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class" }: {
   const [notification, setNotification] = useState<Notification | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
   const [isConfettiActive, setIsConfettiActive] = useState(false)
+  const [healthConditions, setHealthConditions] = useState('')
+  const [additionalInfo, setAdditionalInfo] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setNotification(null)
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
-    if (!name.trim()) {
-      setNotification({ type: 'error', message: "Please provide your name." })
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setNotification({ type: 'error', message: "Please enter a valid email address." })
       return
     }
-    if (!email || !emailRegex.test(email)) {
-      setNotification({ type: 'error', message: "Please provide a valid email address." })
+
+    // Check if email already exists
+    const { data: existingUser, error: checkError } = await supabase
+      .from('free_class_bookings')
+      .select('email')
+      .eq('email', email)
+      .single()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking email:', checkError)
+      setNotification({ type: 'error', message: "An error occurred. Please try again." })
       return
     }
-    console.log('Submitted:', { name, email, phone: phone ? `${countryCode}${phone}` : 'Not provided' })
-    setIsDialogOpen(false)
-    showConfirmation()
+
+    if (existingUser) {
+      setNotification({ type: 'error', message: "This email is already registered. Please use a different email." })
+      return
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('free_class_bookings')
+        .insert([
+          { 
+            name, 
+            email, 
+            phone: phone ? `${countryCode}${phone}` : null,
+            country_code: phone ? countryCode : null,
+            health_conditions: healthConditions || null,
+            additional_info: additionalInfo || null,
+          }
+        ])
+
+      if (error) throw error
+
+      setIsDialogOpen(false)
+      showConfirmation()
+    } catch (error) {
+      console.error('Error inserting data:', error)
+      setNotification({ type: 'error', message: "An error occurred while booking your class. Please try again." })
+    }
   }
 
   const showConfirmation = () => {
@@ -172,6 +210,30 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class" }: {
                     className="flex-1 bg-gray-100 border-gray-300 focus:border-primary focus:ring-primary"
                   />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="health-conditions" className="text-sm font-medium text-gray-700">
+                  Health Conditions/Medical Issues
+                </Label>
+                <Input
+                  id="health-conditions"
+                  value={healthConditions}
+                  onChange={(e) => setHealthConditions(e.target.value)}
+                  className="w-full bg-gray-100 border-gray-300 focus:border-primary focus:ring-primary"
+                  placeholder="E.g., back pain, knee issues, pregnancy, etc."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="additional-info" className="text-sm font-medium text-gray-700">
+                  Any other information you'd like us to know
+                </Label>
+                <Input
+                  id="additional-info"
+                  value={additionalInfo}
+                  onChange={(e) => setAdditionalInfo(e.target.value)}
+                  className="w-full bg-gray-100 border-gray-300 focus:border-primary focus:ring-primary"
+                  placeholder="E.g., specific goals, concerns, or preferences"
+                />
               </div>
               <p className="text-sm text-gray-600 mt-2">
                 We respect your privacy. Your email is required to send you the Zoom link for the class. 
