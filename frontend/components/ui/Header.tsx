@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'  // Add this import
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ function GlowButton() {
 
 export default function Header() {
   const { user, loading } = useUser();
+  const router = useRouter();  // Add this line
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -75,7 +77,7 @@ export default function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/dashboard')}>  {/* Add this onClick handler */}
                 <User className="mr-2 h-4 w-4" />
                 <span>My Account</span>
               </DropdownMenuItem>
