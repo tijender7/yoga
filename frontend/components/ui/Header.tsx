@@ -12,10 +12,12 @@ import {
 import { User, CreditCard, LogOut } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase'
+import BookFreeClass from '@/components/ui/BookFreeClass'
 
 // GlowButton component
 function GlowButton() {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   return (
     <div 
@@ -23,16 +25,17 @@ function GlowButton() {
       onMouseEnter={() => setIsHovered(true)} 
       onMouseLeave={() => setIsHovered(false)}
     >
-      <button
-        className={`
+      <BookFreeClass 
+        buttonText="Start Free Trial"
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        buttonClassName={`
           bg-primary text-primary-foreground hover:bg-primary/90
           transition-all duration-200 ease-out
           px-6 py-2 rounded-full text-sm font-medium
           ${isHovered ? 'shadow-lg' : 'shadow'}
         `}
-      >
-        Start Free Trial
-      </button>
+      />
       {isHovered && (
         <div className="absolute inset-0 -z-10 bg-primary/20 blur-xl rounded-full transition-opacity duration-200 ease-out opacity-75" />
       )}

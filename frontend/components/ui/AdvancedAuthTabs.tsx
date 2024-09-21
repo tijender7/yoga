@@ -181,13 +181,13 @@ export default function AdvancedAuthTabs() {
         <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent">
           <TabsTrigger 
             value="signin" 
-            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
+            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
           >
             Sign In
           </TabsTrigger>
           <TabsTrigger 
             value="signup" 
-            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
+            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
           >
             Sign Up
           </TabsTrigger>

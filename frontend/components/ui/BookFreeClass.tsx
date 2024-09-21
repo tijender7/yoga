@@ -33,8 +33,21 @@ const countryCodes = [
   // Add more country codes as needed
 ]
 
-export default function BookFreeClass({ buttonText = "Book Your Free Class" }: { buttonText?: string }) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+export default function BookFreeClass({ buttonText = "Book Your Free Class", isOpen, onOpenChange, buttonClassName }: { buttonText?: string, isOpen?: boolean, onOpenChange?: (isOpen: boolean) => void, buttonClassName?: string }) {
+  const [isDialogOpen, setIsDialogOpen] = useState(isOpen || false);
+
+  useEffect(() => {
+    if (isOpen !== undefined) {
+      setIsDialogOpen(isOpen);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (onOpenChange) {
+      onOpenChange(isDialogOpen);
+    }
+  }, [isDialogOpen, onOpenChange]);
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
@@ -140,7 +153,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class" }: {
       <div className="relative">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button className={buttonClassName || "bg-primary text-primary-foreground hover:bg-primary/90"}>
               {buttonText}
             </Button>
           </DialogTrigger>
