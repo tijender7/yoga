@@ -13,13 +13,22 @@ import { supabase } from '@/lib/supabase'
 import { AuthError } from '@supabase/supabase-js'
 
 export default function AdvancedAuthTabs() {
-  const [activeTab, setActiveTab] = useState('signup')
+  const [activeTab, setActiveTab] = useState<string>('signin')
   const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [agreeToTerms, setAgreeToTerms] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [password, setPassword] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  const handleSignupPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setSignupPassword(newPassword);
+    calculatePasswordStrength(newPassword);
+  };
 
   useEffect(() => {
     if (alert) {
@@ -171,94 +180,18 @@ export default function AdvancedAuthTabs() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent">
           <TabsTrigger 
-            value="signup" 
-            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
-          >
-            Sign Up
-          </TabsTrigger>
-          <TabsTrigger 
             value="signin" 
             className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
           >
             Sign In
           </TabsTrigger>
+          <TabsTrigger 
+            value="signup" 
+            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
+          >
+            Sign Up
+          </TabsTrigger>
         </TabsList>
-        <TabsContent value="signup">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">Email</Label>
-              <Input id="signup-email" name="email" type="email" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">Password</Label>
-              <div className="relative">
-                <Input
-                  id="signup-password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  onChange={(e) => calculatePasswordStrength(e.target.value)}
-                  className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">
-                    {showPassword ? "Hide password" : "Show password"}
-                  </span>
-                </Button>
-              </div>
-              <Progress value={passwordStrength} className="w-full h-2" />
-              <p className="text-sm text-gray-600 mt-1">
-                Password strength: <span className={`font-medium ${passwordStrength < 25 ? 'text-red-500' : passwordStrength < 50 ? 'text-yellow-500' : passwordStrength < 75 ? 'text-blue-500' : 'text-green-500'}`}>
-                  {passwordStrength < 25 ? 'Weak' : passwordStrength < 50 ? 'Fair' : passwordStrength < 75 ? 'Good' : 'Strong'}
-                </span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-confirm-password" className="text-sm font-medium text-gray-700">Confirm Password</Label>
-              <Input id="signup-confirm-password" name="confirmPassword" type="password" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-username" className="text-sm font-medium text-gray-700">Username</Label>
-              <Input id="signup-username" name="username" type="text" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)} />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a>
-              </label>
-            </div>
-            <Button type="submit" className="w-full bg-primary text-white hover:bg-primary-dark font-medium" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
-                </>
-              ) : (
-                'Sign Up'
-              )}
-            </Button>
-          </form>
-          <div className="mt-4">
-            <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-center" onClick={handleGoogleSignUp} disabled>
-              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" fill="#4285F4"/></svg>
-              Sign up with Google (Coming Soon)
-            </Button>
-          </div>
-        </TabsContent>
         <TabsContent value="signin">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -274,6 +207,8 @@ export default function AdvancedAuthTabs() {
                   type={showPassword ? "text" : "password"}
                   required
                   className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <Button
                   type="button"
@@ -316,6 +251,109 @@ export default function AdvancedAuthTabs() {
           <Button variant="link" className="mt-2 w-full text-primary hover:underline" onClick={() => setActiveTab('forgot-password')}>
             Forgot Password?
           </Button>
+        </TabsContent>
+        <TabsContent value="signup">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">Email</Label>
+              <Input id="signup-email" name="email" type="email" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">Password</Label>
+              <div className="relative">
+                <Input
+                  id="signup-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
+                  value={signupPassword}
+                  onChange={handleSignupPasswordChange}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
+              <Progress value={passwordStrength} className="w-full h-2" />
+              <p className="text-sm text-gray-600 mt-1">
+                Password strength: <span className={`font-medium ${passwordStrength < 25 ? 'text-red-500' : passwordStrength < 50 ? 'text-yellow-500' : passwordStrength < 75 ? 'text-blue-500' : 'text-green-500'}`}>
+                  {passwordStrength < 25 ? 'Weak' : passwordStrength < 50 ? 'Fair' : passwordStrength < 75 ? 'Good' : 'Strong'}
+                </span>
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  name="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                  <span className="sr-only">
+                    {showPassword ? "Hide password" : "Show password"}
+                  </span>
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="signup-username" className="text-sm font-medium text-gray-700">Username</Label>
+              <Input id="signup-username" name="username" type="text" required className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="terms" checked={agreeToTerms} onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)} />
+              <label
+                htmlFor="terms"
+                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a>
+              </label>
+            </div>
+            <Button type="submit" className="w-full bg-primary text-white hover:bg-primary-dark font-medium" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Please wait
+                </>
+              ) : (
+                'Sign Up'
+              )}
+            </Button>
+          </form>
+          <div className="mt-4">
+            <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-medium flex items-center justify-center" onClick={handleGoogleSignUp} disabled>
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z" fill="#4285F4"/></svg>
+              Sign up with Google (Coming Soon)
+            </Button>
+          </div>
         </TabsContent>
         <TabsContent value="forgot-password">
           <form onSubmit={handleForgotPassword} className="space-y-4">
