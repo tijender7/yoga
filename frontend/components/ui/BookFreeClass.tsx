@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import ReactConfetti from 'react-confetti'
 import { useEffect, useRef } from 'react'
-import { toast, Toaster } from 'sonner'
+import { toast } from 'sonner'
 
 
 type NotificationType = 'success' | 'error' | null;
@@ -89,7 +89,6 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class" }: {
 
   return (
     <>
-      <Toaster />
       {isConfettiActive && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 9999 }}>
           <ReactConfetti
