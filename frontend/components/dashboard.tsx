@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Calendar as CalendarIcon, CreditCard, HelpCircle, LogOut, Moon, Sun, Upload, User, Award, TrendingUp, Zap, X } from "lucide-react"
+import { Bell, Calendar as CalendarIcon, CreditCard, HelpCircle, LogOut, Moon, Sun, Upload, User, Award, TrendingUp, Zap } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,7 +44,8 @@ const mockPayments = [
   { date: "Apr 1, 2022", plan: "6-Month Premium", amount: "$119.99", method: "Credit Card" },
 ]
 
-export default function Dashboard() {
+export function DashboardComponent() {
+  const [theme, setTheme] = useState<"light" | "dark">("light")
   const [isLoading, setIsLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [availableSessions, setAvailableSessions] = useState<any[]>([])
@@ -59,6 +60,11 @@ export default function Dashboard() {
     // Simulating data fetch
     setTimeout(() => setIsLoading(false), 2000)
   }, [])
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light")
+    // In a real app, you'd apply the theme change here
+  }
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date)
@@ -76,21 +82,34 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-10 border-b bg-white">
+    <div className={`min-h-screen bg-background ${theme}`}>
+      <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex items-center justify-between py-4">
-          <h1 className="text-2xl font-bold text-black">Yoga Dashboard</h1>
+          <h1 className="text-2xl font-bold">Yoga Dashboard</h1>
           <div className="flex items-center gap-4">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="icon" onClick={() => setShowNotificationCenter(!showNotificationCenter)} className="text-black">
+                  <Button variant="outline" size="icon" onClick={() => setShowNotificationCenter(!showNotificationCenter)}>
                     <Bell className="h-5 w-5" />
                     <span className="sr-only">Notifications</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>View Notifications</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon" onClick={toggleTheme}>
+                    {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                    <span className="sr-only">Toggle theme</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle theme</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -166,9 +185,36 @@ export default function Dashboard() {
               <Progress value={33} className="h-2 w-full" />
               <p className="mt-2 text-sm text-muted-foreground">67 XP to next level</p>
               <div className="mt-4 grid grid-cols-3 gap-4">
-                <ProgressCard title="Flexibility" value="+15%" change="+2%" />
-                <ProgressCard title="Strength" value="+8%" change="+1%" />
-                <ProgressCard title="Balance" value="+12%" change="+3%" />
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Flexibility</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">+15%</div>
+                    <p className="text-xs text-muted-foreground">+2% from last month</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Strength</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">+8%</div>
+                    <p className="text-xs text-muted-foreground">+1% from last month</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Balance</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">+12%</div>
+                    <p className="text-xs text-muted-foreground">+3% from last month</p>
+                  </CardContent>
+                </Card>
               </div>
             </CardContent>
           </Card>
@@ -189,39 +235,15 @@ export default function Dashboard() {
                   <Skeleton className="h-[400px] w-full" />
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="relative">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={handleDateSelect}
-                        className="rounded-md border"
-                        disabled={(date) => 
-                          !mockUserData.isPremium && (date.getDay() !== 0 && date.getDay() !== 6)
-                        }
-                        classNames={{
-                          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                          month: "space-y-4",
-                          caption: "flex justify-center pt-1 relative items-center",
-                          caption_label: "text-sm font-medium",
-                          nav: "space-x-1 flex items-center",
-                          nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                          nav_button_previous: "absolute left-1",
-                          nav_button_next: "absolute right-1",
-                          table: "w-full border-collapse space-y-1",
-                          head_row: "flex",
-                          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-                          row: "flex w-full mt-2",
-                          cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
-                          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-                          day_today: "bg-accent text-accent-foreground",
-                          day_outside: "text-muted-foreground opacity-50",
-                          day_disabled: "text-muted-foreground opacity-50",
-                          day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
-                          day_hidden: "invisible",
-                        }}
-                      />
-                    </div>
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateSelect}
+                      className="rounded-md border"
+                      disabled={(date) => 
+                        !mockUserData.isPremium && (date.getDay() !== 0 && date.getDay() !== 6)
+                      }
+                    />
                     <div>
                       <h3 className="mb-2 font-semibold">Available Sessions for {selectedDate?.toDateString()}</h3>
                       {availableSessions.length > 0 ? (
@@ -364,40 +386,20 @@ export default function Dashboard() {
         </div>
       </main>
       {showNotificationCenter && (
-        <div className="fixed inset-y-0 right-0 z-50 w-64 bg-white p-4 shadow-lg"> {/* Update bg-background to bg-white */}
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-black">Notifications</h2> {/* Add text-black class */}
-            <Button variant="ghost" size="sm" onClick={() => setShowNotificationCenter(false)} className="text-black"> {/* Add text-black class */}
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className="fixed inset-y-0 right-0 z-50 w-64 bg-background p-4 shadow-lg">
+          <h2 className="mb-4 text-lg font-semibold">Notifications</h2>
           <div className="space-y-4">
-            <div className="rounded-lg bg-gray-100 p-3">
-              <p className="font-medium text-black">New class available</p> {/* Add text-black class */}
-              <p className="text-sm text-black">A new Vinyasa Flow class has been added for tomorrow.</p> {/* Add text-black class */}
+            <div className="rounded-lg bg-muted p-3">
+              <p className="font-medium">New class available</p>
+              <p className="text-sm text-muted-foreground">A new Vinyasa Flow class has been added for tomorrow.</p>
             </div>
-            <div className="rounded-lg bg-gray-100 p-3">
-              <p className="font-medium text-black">Upcoming session reminder</p> {/* Add text-black class */}
-              <p className="text-sm text-black">You have a Hatha Yoga session in 1 hour.</p> {/* Add text-black class */}
+            <div className="rounded-lg bg-muted p-3">
+              <p className="font-medium">Upcoming session reminder</p>
+              <p className="text-sm text-muted-foreground">You have a Hatha Yoga session in 1 hour.</p>
             </div>
           </div>
         </div>
       )}
     </div>
   )
-}
-
-function ProgressCard({ title, value, change }: { title: string, value: string, change: string }) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{change} from last month</p>
-      </CardContent>
-    </Card>
-  );
 }

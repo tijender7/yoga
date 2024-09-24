@@ -32,5 +32,5 @@ export function useUser() {
     }
   }, [])
 
-  return { user, loading }
+  return { user, loading, setUser }
 }
