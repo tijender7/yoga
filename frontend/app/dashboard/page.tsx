@@ -18,6 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Link from "next/link" // Import Link component
 
 // Mock data for demonstration purposes
 const mockUserData = {
@@ -79,7 +80,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-10 border-b bg-white">
         <div className="container flex items-center justify-between py-4">
-          <h1 className="text-2xl font-bold text-black">Yoga Dashboard</h1>
+          <Link href="/"> {/* Wrap YogaHarmony text with Link component */}
+            <h1 className="text-2xl font-bold text-black cursor-pointer">YogaHarmony</h1>
+          </Link>
           <div className="flex items-center gap-4">
             <TooltipProvider>
               <Tooltip>
@@ -194,25 +197,25 @@ export default function Dashboard() {
                         mode="single"
                         selected={selectedDate}
                         onSelect={handleDateSelect}
-                        className="rounded-md border"
+                        className="rounded-md border bg-white" // Add bg-white class here
                         disabled={(date) => 
                           !mockUserData.isPremium && (date.getDay() !== 0 && date.getDay() !== 6)
                         }
                         classNames={{
                           months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                           month: "space-y-4",
-                          caption: "flex justify-center pt-1 relative items-center",
+                          caption: "flex justify-between items-center px-2",
                           caption_label: "text-sm font-medium",
                           nav: "space-x-1 flex items-center",
                           nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-                          nav_button_previous: "absolute left-1",
-                          nav_button_next: "absolute right-1",
+                          nav_button_previous: "relative left-0",
+                          nav_button_next: "relative right-0",
                           table: "w-full border-collapse space-y-1",
                           head_row: "flex",
-                          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+                          head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem] text-center",
                           row: "flex w-full mt-2",
                           cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+                          day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground",
                           day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
                           day_today: "bg-accent text-accent-foreground",
                           day_outside: "text-muted-foreground opacity-50",
