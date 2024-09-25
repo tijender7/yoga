@@ -1,3 +1,5 @@
+"use client"
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
@@ -12,8 +14,10 @@ import { ScrollAnimation } from '@/components/ui/ScrollAnimation'
 import BookFreeClass from '@/components/ui/BookFreeClass'
 import { Toaster } from 'sonner'
 import Header from '@/components/ui/Header'
+import { useState } from 'react'
 
 export default function YogaLanding() {
+  const [selectedCountry, setSelectedCountry] = useState('IND');
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
@@ -237,7 +241,7 @@ export default function YogaLanding() {
         </ScrollAnimation>
         
         <ScrollAnimation>
-          <section className="w-full py-12 md:py-24 lg:py-32">
+          <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
             <div className="container px-4 md:px-6">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">What Our Clients Say</h2>
               <div className="grid gap-6 lg:grid-cols-3">
@@ -277,7 +281,7 @@ export default function YogaLanding() {
         </ScrollAnimation>
         
         <ScrollAnimation>
-          <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+          <section id="benefits" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
             <div className="container px-4 md:px-6">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Why Choose Our Online Yoga Classes?</h2>
               <div className="grid gap-6 lg:grid-cols-4">
@@ -316,12 +320,15 @@ export default function YogaLanding() {
           <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
             <div className="container px-4 md:px-6">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
+              
+              
+
               <div className="grid gap-6 lg:grid-cols-3">
                 {[
                   { 
                     title: 'Monthly', 
-                    price: '$55', 
-                    originalPrice: '$90',
+                    price: selectedCountry === 'IND' ? '₹4,000' : (selectedCountry === 'GER' ? '€55' : '£45'),
+                    originalPrice: selectedCountry === 'IND' ? '₹6,500' : (selectedCountry === 'GER' ? '€90' : '£75'),
                     duration: '1 month',
                     features: [
                       'All Inclusive',
@@ -332,36 +339,36 @@ export default function YogaLanding() {
                       'Strength training',
                       'Posture fix',
                       'Personalized feel',
-                      'Price increases to $90 after first month'
+                      'Price increases after first month'
                     ]
                   },
                   { 
                     title: 'Annual', 
-                    price: '$55/month', 
+                    price: selectedCountry === 'IND' ? '₹3,300/month' : (selectedCountry === 'GER' ? '€45/month' : '£37/month'),
                     duration: '12 months',
-                    totalPrice: '$660',
-                    savings: '$420',
+                    totalPrice: selectedCountry === 'IND' ? '₹40,000' : (selectedCountry === 'GER' ? '€550' : '£450'),
+                    savings: selectedCountry === 'IND' ? '₹25,000' : (selectedCountry === 'GER' ? '€420' : '£350'),
                     popular: true,
                     features: [
                       'All Inclusive',
                       'All features of Monthly plan',
                       'Best value for money',
-                      'Total cost: $660 for 12 months',
-                      'Save $420 compared to monthly plan'
+                      'Total cost for 12 months',
+                      'Save compared to monthly plan'
                     ]
                   },
                   { 
                     title: '6 Months', 
-                    price: '$70/month', 
+                    price: selectedCountry === 'IND' ? '₹3,700/month' : (selectedCountry === 'GER' ? '€50/month' : '£41/month'),
                     duration: '6 months',
-                    totalPrice: '$420',
-                    savings: '$120',
+                    totalPrice: selectedCountry === 'IND' ? '₹22,000' : (selectedCountry === 'GER' ? '€300' : '£250'),
+                    savings: selectedCountry === 'IND' ? '₹7,000' : (selectedCountry === 'GER' ? '€120' : '£100'),
                     features: [
                       'All Inclusive',
                       'All features of Monthly plan',
                       'Discounted rate for 6 months',
-                      'Total cost: $420 for 6 months',
-                      'Save $120 compared to monthly plan'
+                      'Total cost for 6 months',
+                      'Save compared to monthly plan'
                     ]
                   },
                 ].map((plan, index) => (
@@ -400,6 +407,47 @@ export default function YogaLanding() {
                           </li>
                         ))}
                       </ul>
+                      <div className="flex justify-center space-x-4 mb-4">
+                        <Button 
+                          variant={selectedCountry === 'IND' ? 'default' : 'outline'} 
+                          onClick={() => setSelectedCountry('IND')}
+                          className="p-1"
+                        >
+                          <Image
+                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/india.png"
+                            alt="India"
+                            width={30}
+                            height={24}
+                            className="rounded"
+                          />
+                        </Button>
+                        <Button 
+                          variant={selectedCountry === 'GER' ? 'default' : 'outline'} 
+                          onClick={() => setSelectedCountry('GER')}
+                          className="p-1"
+                        >
+                          <Image
+                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/germany.png"
+                            alt="Germany"
+                            width={30}
+                            height={24}
+                            className="rounded"
+                          />
+                        </Button>
+                        <Button 
+                          variant={selectedCountry === 'UK' ? 'default' : 'outline'} 
+                          onClick={() => setSelectedCountry('UK')}
+                          className="p-1"
+                        >
+                          <Image
+                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/united-kingdom.png"
+                            alt="United Kingdom"
+                            width={30}
+                            height={24}
+                            className="rounded"
+                          />
+                        </Button>
+                      </div>
                       <Button className="w-full mt-auto">Subscribe Now</Button>
                     </CardContent>
                   </Card>
@@ -422,7 +470,7 @@ export default function YogaLanding() {
         </ScrollAnimation>
         
         <ScrollAnimation>
-          <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+          <section id="faq" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
             <div className="container px-4 md:px-6">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Frequently Asked Questions</h2>
               <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
