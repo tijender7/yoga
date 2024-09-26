@@ -191,10 +191,54 @@ export default function AdvancedAuthTabs() {
           setActiveTab('signin')
         }, 3000) // 3 seconds
 
-      } else {
+      } else if (activeTab === 'signin') {
         // Sign-In Logic
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+
+        if (!data.session || !data.session.user) {
+          throw new Error('User session not found after signin')
+        }
+
+        const user = data.session.user
+
+        if (!user.email_confirmed_at) {
+          // Email is not verified
+          // Sign the user out
+          const { error: signOutError } = await supabase.auth.signOut()
+          if (signOutError) {
+            console.error('Error signing out:', signOutError)
+          }
+
+          // Inform the user to verify their email
+          setAlert({
+            type: 'error',
+            message: 'Please verify your email before signing in. A verification link has been sent to your email.',
+          })
+
+          // Optionally, resend the verification email
+          const { error: resendError } = await supabase.auth.updateUser({
+            email: user.email,
+          })
+
+          if (resendError) {
+            console.error('Error resending verification email:', resendError)
+            setAlert({
+              type: 'error',
+              message: 'Failed to resend verification email. Please contact support.',
+            })
+          } else {
+            setAlert({
+              type: 'info',
+              message: 'A verification link has been resent to your email.',
+            })
+          }
+
+          setIsLoading(false)
+          return
+        }
+
+        // If email is verified, proceed with sign-in
         setAlert({ type: 'success', message: 'You have successfully signed in!' })
         // Redirect to Home Page After Successful Sign-In
         window.location.href = '/'
@@ -221,7 +265,7 @@ export default function AdvancedAuthTabs() {
             message: error.message || 'An unexpected error occurred during signup.'
           })
         }
-      } else {
+      } else if (activeTab === 'signin') {
         // Handle Specific Sign-In Errors
         if (error instanceof AuthError) {
           switch (error.message) {
@@ -254,9 +298,39 @@ export default function AdvancedAuthTabs() {
     // Implementation Pending
   }
 
-  // Forgot Password Handler (Point 10 Skipped)
+  // Forgot Password Handler (Point 10 Implemented)
   const handleForgotPassword = async (event: React.FormEvent<HTMLFormElement>) => {
-    // Implementation Pending
+    event.preventDefault()
+    setIsLoading(true)
+    setFormErrors({}) // Reset errors
+
+    const formData = new FormData(event.currentTarget)
+    const email = formData.get('email') as string
+
+    // Email Validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setFormErrors({ email: 'Please enter a valid email address' })
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password', // Customize the redirect URL as needed
+      })
+
+      if (error) throw error
+
+      setAlert({ type: 'success', message: 'Password reset email sent! Please check your inbox.' })
+    } catch (error: any) {
+      console.error('Password reset failed:', error)
+      setAlert({
+        type: 'error',
+        message: error.message || 'An unexpected error occurred during password reset.'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Reset Password Handler (Point 10 Skipped)
@@ -615,7 +689,11 @@ export default function AdvancedAuthTabs() {
         </TabsContent>
       </Tabs>
       {alert && (
-        <Alert variant={alert.type === 'error' ? 'destructive' : 'default'} className="mt-4" role="alert">
+        <Alert 
+          variant={alert.type === 'error' ? 'destructive' : 'default'} 
+          className="mt-4" 
+          role="alert"
+        >
           {alert.type === 'error' ? (
             <AlertCircle className="h-4 w-4 text-red-500" />
           ) : alert.type === 'success' ? (
