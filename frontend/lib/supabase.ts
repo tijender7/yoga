@@ -8,3 +8,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+export async function fetchPricingPlans() {
+  const { data, error } = await supabase
+    .from('pricing_plans')
+    .select('*')
+
+  if (error) {
+    console.error('Error fetching pricing plans:', error)
+    return []
+  }
+
+  return data
+}

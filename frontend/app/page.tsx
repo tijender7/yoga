@@ -344,7 +344,7 @@ export default function YogaLanding() {
                   },
                   { 
                     title: 'Annual', 
-                    price: selectedCountry === 'IND' ? '₹3,300/month' : (selectedCountry === 'GER' ? '€45/month' : '£37/month'),
+                    price: selectedCountry === 'IND' ? '₹4,000/month' : (selectedCountry === 'GER' ? '€45/month' : '£42/month'),
                     duration: '12 months',
                     totalPrice: selectedCountry === 'IND' ? '₹40,000' : (selectedCountry === 'GER' ? '€550' : '£450'),
                     savings: selectedCountry === 'IND' ? '₹25,000' : (selectedCountry === 'GER' ? '€420' : '£350'),
@@ -359,7 +359,7 @@ export default function YogaLanding() {
                   },
                   { 
                     title: '6 Months', 
-                    price: selectedCountry === 'IND' ? '₹3,700/month' : (selectedCountry === 'GER' ? '€50/month' : '£41/month'),
+                    price: selectedCountry === 'IND' ? '₹7,000/month' : (selectedCountry === 'GER' ? '€50/month' : '£41/month'),
                     duration: '6 months',
                     totalPrice: selectedCountry === 'IND' ? '₹22,000' : (selectedCountry === 'GER' ? '€300' : '£250'),
                     savings: selectedCountry === 'IND' ? '₹7,000' : (selectedCountry === 'GER' ? '€120' : '£100'),
