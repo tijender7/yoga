@@ -183,14 +183,34 @@ export default function AdvancedAuthTabs() {
           throw new Error('Profile creation failed. Please contact support.')
         }
 
-        // Step 4: Success Alert and Redirect to Sign-In
-        setAlert({ type: 'success', message: 'Signup successful! Please check your email for the confirmation link. Redirecting to sign in...' })
+        // Step 4: After successful signup, make API call to backend
+        if (data && data.user) {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {// Adjust API endpoint as needed
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: data.user.id,
+              email: email,
+              username: username, 
+              // Add other user data as needed
+            }),
+          });
 
-        // Set the Redirect Timer (3 Seconds)
-        redirectTimerRef.current = setTimeout(() => {
-          setActiveTab('signin')
-        }, 3000) // 3 seconds
-
+          if (response.ok) {
+            // Handle success (e.g., show success alert, redirect)
+            setAlert({ type: 'success', message: 'Signup successful! Redirecting to sign in...' });
+            setTimeout(() => {
+              setActiveTab('signin');
+            }, 3000); // 3 seconds
+          } else {
+            // Handle error from backend API call
+            const errorData = await response.json();
+            console.error('Backend API error:', errorData);
+            setAlert({ type: 'error', message: errorData.message || 'An error occurred during signup.' });
+          }
+        }
       } else if (activeTab === 'signin') {
         // Sign-In Logic
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })
