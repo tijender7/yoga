@@ -19,6 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function YogaLanding() {
   const [selectedRegion, setSelectedRegion] = useState('India');
+  const [selectedPlan, setSelectedPlan] = useState('Annual');
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
@@ -424,7 +425,11 @@ export default function YogaLanding() {
                     ]
                   },
                 ].map((plan, index) => (
-                  <Card key={index} className={`flex flex-col ${plan.popular ? 'border-2 border-primary' : ''}`}>
+                  <Card 
+                    key={index} 
+                    className={`flex flex-col ${selectedPlan === plan.title ? 'border-2 border-primary' : ''}`}
+                    onClick={() => setSelectedPlan(plan.title)}
+                  >
                     <CardHeader>
                       <CardTitle className="text-2xl font-bold text-gray-800">
                         {plan.title}
@@ -459,7 +464,10 @@ export default function YogaLanding() {
                           </li>
                         ))}
                       </ul>
-                      <Button className="w-full mt-auto">Subscribe Now</Button>
+                      <Button className="w-full mt-auto" onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click event
+                        // Your subscribe logic here
+                      }}>Subscribe Now</Button>
                     </CardContent>
                   </Card>
                 ))}
