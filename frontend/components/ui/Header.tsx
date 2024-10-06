@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, CreditCard, LogOut } from 'lucide-react'
+import { User, CreditCard, LogOut, Menu, X } from 'lucide-react'  // Add Menu and X here
 import { useUser } from '@/hooks/useUser'
 import { supabase } from '@/lib/supabase'
 import BookFreeClass from '@/components/ui/BookFreeClass'
@@ -27,13 +27,13 @@ function GlowButton() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <BookFreeClass 
-        buttonText="Start Free Trial"
+        buttonText="Free Trial"
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         buttonClassName={`
           bg-primary text-primary-foreground hover:bg-primary/90
           transition-all duration-200 ease-out
-          px-6 py-2 rounded-full text-sm font-medium
+          px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
           ${isHovered ? 'shadow-lg' : 'shadow'}
         `}
       />
@@ -46,24 +46,34 @@ function GlowButton() {
 
 export default function Header() {
   const { user, loading } = useUser();
-  const router = useRouter();  // Add this line
+  const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // Optionally, redirect to home page or refresh the page
     window.location.href = '/';
   };
 
   return (
-    <header className="px-4 lg:px-6 h-16 flex items-center bg-white shadow-sm">
+    <header className="px-2 sm:px-4 lg:px-6 h-14 flex items-center justify-between bg-white shadow-sm sticky top-0 z-50">
       <Link className="flex items-center justify-center" href="#">
-        <span className="text-2xl font-bold text-primary">YogaHarmony</span>
+        <span className="text-lg sm:text-xl font-bold text-primary">YogaHarmony</span>
       </Link>
-      <nav className="ml-auto flex items-center gap-4 sm:gap-6">
-        <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#about">About</Link>
-        <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#services">Services</Link>
-        <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#pricing">Pricing</Link>
-        <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#contact">Contact</Link>
+      <div className="flex items-center gap-1 sm:gap-2">
+        <nav className="hidden md:flex items-center gap-4 mr-4">
+          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#about">About</Link>
+          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#services">Services</Link>
+          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#pricing">Pricing</Link>
+          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#contact">Contact</Link>
+        </nav>
+        {!loading && !user && (
+          <Link href="/auth">
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+              Login
+            </Button>
+          </Link>
+        )}
+        <GlowButton />
         {loading ? (
           <Button variant="ghost" size="icon" disabled>
             <span className="sr-only">Loading</span>
@@ -77,13 +87,13 @@ export default function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => router.push('/dashboard')}>  {/* Add this onClick handler */}
+              <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>My Account</span>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard className="mr-2 h-4 w-4" />
-                <span>Billing Settings</span>
+                <span>Billing</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
@@ -91,15 +101,28 @@ export default function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <Link href="/auth">
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
-              Login
-            </Button>
-          </Link>
-        )}
-        <GlowButton />
-      </nav>
+        ) : null}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? (
+            <X className="h-5 w-5 text-black" />
+          ) : (
+            <Menu className="h-5 w-5 text-black" />
+          )}
+        </Button>
+      </div>
+      {isMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-white shadow-md py-2 md:hidden">
+          <Link className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" href="#about">About</Link>
+          <Link className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" href="#services">Services</Link>
+          <Link className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" href="#pricing">Pricing</Link>
+          <Link className="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" href="#contact">Contact</Link>
+        </div>
+      )}
     </header>
   )
 }

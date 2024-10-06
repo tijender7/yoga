@@ -23,20 +23,22 @@ export default function YogaLanding() {
       <Header />
       <main className="flex-1">
         <ScrollAnimation>
-          <section className="w-full py-18 md:py-36 lg:py-48 xl:py-72 relative bg-gradient-to-br from-purple-800 to-indigo-900 overflow-hidden">
-            <FlowingYogaEnergyBackground />
+          <section className="w-full py-12 md:py-24 lg:py-32 relative bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
+            <div className="absolute inset-0 w-full h-full">
+              <FlowingYogaEnergyBackground className="opacity-20" />
+            </div>
             <div className="container px-4 md:px-6 relative z-10">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-white mb-4">
+              <div className="text-center max-w-3xl mx-auto">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6">
                   Transform Your Mind & Body with Yoga
                 </h1>
-                <p className="max-w-[800px] text-zinc-200 md:text-xl mx-auto mb-6">
+                <p className="text-lg sm:text-xl text-gray-300 mb-8">
                   Join our tailored classes for all levels and invest in your future health.
                   Age gracefully with yoga - your key to a vibrant, pain-free life.
                 </p>
-                <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-                  <Button size="lg">Start Your Journey</Button>
-                  <Button variant="outline" size="lg">Explore Classes</Button>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button size="lg" className="w-full sm:w-auto bg-white text-gray-900 hover:bg-gray-100">Start Your Journey</Button>
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-gray-900">Explore Classes</Button>
                 </div>
               </div>
             </div>
@@ -137,15 +139,17 @@ export default function YogaLanding() {
                 {/* Right column - image and details */}
                 <Card className="p-6 h-full flex flex-col justify-between" style={{ minHeight: '660px' }}>
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="w-full h-[500px] flex justify-center items-center bg-gray-100 rounded-lg overflow-hidden">
-                      <Image
-                        src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/suman_masi_image.jpg"
-                        alt="Suman Arya"
-                        width={500}
-                        height={500}
-                        style={{ width: 'auto', height: '100%', objectFit: 'contain' }}
-                        className="rounded-lg"
-                      />
+                    <div className="w-full aspect-[4/3] max-w-[500px] mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="relative w-full h-full">
+                        <Image
+                          src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/suman_masi_image.jpg"
+                          alt="Suman Arya"
+                          fill
+                          sizes="(max-width: 500px) 100vw, 500px"
+                          style={{ objectFit: 'cover' }}
+                          className="rounded-lg"
+                        />
+                      </div>
                     </div>
                     <div className="w-full text-center">
                       <h3 className="text-xl font-bold text-gray-800">Suman Arya</h3>
@@ -153,6 +157,27 @@ export default function YogaLanding() {
                       <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                         With over a decade of experience, Suman Arya brings unparalleled expertise to every class, offering a transformative experience for all levels.
                       </p>
+                    </div>
+                  </div>
+                  
+                  {/* Updated content with correct text wrapping and alignment */}
+                  <div className="mt-6 space-y-4 text-left">
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-800">Certifications:</h4>
+                      <ul className="list-disc list-outside text-sm text-gray-700 pl-4">
+                        <li className="text-wrap">500-Hour Yoga Teacher Certification</li>
+                        <li className="text-wrap">Certified Yoga Protocol Instructor by The Yoga Certification Board, Ministry of AYUSH, Government of India</li>
+                        <li className="text-wrap">Specialized in various yoga styles including Hatha, Vinyasa, and Restorative Yoga</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-800">Class Offerings:</h4>
+                      <ul className="list-disc list-outside text-sm text-gray-700 pl-4">
+                        <li className="text-wrap">Beginner-friendly yoga sessions</li>
+                        <li className="text-wrap">Advanced posture workshops</li>
+                        <li className="text-wrap">Meditation and pranayama classes</li>
+                        <li className="text-wrap">Yoga for stress relief and relaxation</li>
+                      </ul>
                     </div>
                   </div>
                 </Card>

@@ -262,3 +262,31 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
     </>
   )
 }
+
+function GlowButton() {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  return (
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <BookFreeClass 
+        buttonText="Free Trial"
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        buttonClassName={`
+          bg-primary text-primary-foreground hover:bg-primary/90
+          transition-all duration-200 ease-out
+          px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium
+          ${isHovered ? 'shadow-lg' : 'shadow'}
+        `}
+      />
+      {isHovered && (
+        <div className="absolute inset-0 -z-10 bg-primary/20 blur-xl rounded-full transition-opacity duration-200 ease-out opacity-75" />
+      )}
+    </div>
+  )
+}

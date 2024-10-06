@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import ResponsiveImage from './ResponsiveImage';
 
 const YogaCarousel = () => {
   const [images, setImages] = useState<string[]>([]);
@@ -33,22 +33,21 @@ const YogaCarousel = () => {
   if (images.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto relative">
-      <div className="relative h-64 md:h-96 bg-gray-100">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Image 
-            src={images[currentIndex]} 
-            alt={`Student ${currentIndex}`} 
-            width={500}
-            height={300}
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
+    <div className="max-w-4xl mx-auto relative overflow-hidden">
+      <div className="relative aspect-[16/9] bg-gray-100">
+        <ResponsiveImage 
+          src={images[currentIndex]} 
+          alt={`Student ${currentIndex}`} 
+          priority={currentIndex === 0}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-contain"
+        />
       </div>
-      <button onClick={prevSlide} className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2">
+      <button onClick={prevSlide} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10">
         &lt;
       </button>
-      <button onClick={nextSlide} className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2">
+      <button onClick={nextSlide} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10">
         &gt;
       </button>
     </div>

@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 
-const FlowingYogaEnergyBackground = () => {
+interface FlowingYogaEnergyBackgroundProps {
+  className?: string;
+}
+
+const FlowingYogaEnergyBackground: React.FC<FlowingYogaEnergyBackgroundProps> = ({ className = '' }) => {
   const [time, setTime] = useState(0);
 
   useEffect(() => {
@@ -17,8 +21,13 @@ const FlowingYogaEnergyBackground = () => {
     amplitude * Math.sin(frequency * x + phase + time);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
-      <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
+    <div className={`absolute inset-0 ${className}`}>
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         {/* Energy waves */}
         {[0, 1, 2].map((i) => (
           <path
@@ -49,11 +58,11 @@ const FlowingYogaEnergyBackground = () => {
         />
         
         {/* Energy particles */}
-        {[...Array(20)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <circle
             key={i}
-            cx={i * 5}
-            cy={50 + wave(i * 5, 10, 0.2, i * 0.2)}
+            cx={i * 10}
+            cy={50 + wave(i * 10, 10, 0.2, i * 0.2)}
             r="0.5"
             fill="white"
             opacity={Math.round((0.5 + Math.sin(time + i) * 0.5) * 100) / 100}
