@@ -15,9 +15,10 @@ import BookFreeClass from '@/components/ui/BookFreeClass'
 import { Toaster } from 'sonner'
 import Header from '@/components/ui/Header'
 import { useState } from 'react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export default function YogaLanding() {
-  const [selectedCountry, setSelectedCountry] = useState('IND');
+  const [selectedRegion, setSelectedRegion] = useState('India');
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
@@ -343,17 +344,43 @@ export default function YogaLanding() {
         
         <ScrollAnimation>
           <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-            <div className="container px-4 md:px-6">
+            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
               
-              
+              <div className="flex justify-center mb-8">
+                <Tabs defaultValue="India" className="w-full max-w-[300px]">
+                  <TabsList className="grid w-full grid-cols-3 rounded-md bg-white p-1 text-gray-500 shadow-sm">
+                    <TabsTrigger 
+                      value="India" 
+                      onClick={() => setSelectedRegion('India')}
+                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
+                    >
+                      India
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="Europe" 
+                      onClick={() => setSelectedRegion('Europe')}
+                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
+                    >
+                      Europe
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="US" 
+                      onClick={() => setSelectedRegion('US')}
+                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
+                    >
+                      US
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
 
               <div className="grid gap-6 lg:grid-cols-3">
                 {[
                   { 
                     title: 'Monthly', 
-                    price: selectedCountry === 'IND' ? '₹4,000' : (selectedCountry === 'GER' ? '€55' : '£45'),
-                    originalPrice: selectedCountry === 'IND' ? '₹6,500' : (selectedCountry === 'GER' ? '€90' : '£75'),
+                    price: selectedRegion === 'India' ? '₹4,000' : (selectedRegion === 'Europe' ? '€55' : '$60'),
+                    originalPrice: selectedRegion === 'India' ? '₹6,500' : (selectedRegion === 'Europe' ? '€90' : '$100'),
                     duration: '1 month',
                     features: [
                       'All Inclusive',
@@ -369,10 +396,10 @@ export default function YogaLanding() {
                   },
                   { 
                     title: 'Annual', 
-                    price: selectedCountry === 'IND' ? '₹4,000/month' : (selectedCountry === 'GER' ? '€45/month' : '£42/month'),
+                    price: selectedRegion === 'India' ? '₹4,000/month' : (selectedRegion === 'Europe' ? '€45/month' : '$50/month'),
                     duration: '12 months',
-                    totalPrice: selectedCountry === 'IND' ? '₹40,000' : (selectedCountry === 'GER' ? '€550' : '£450'),
-                    savings: selectedCountry === 'IND' ? '₹25,000' : (selectedCountry === 'GER' ? '€420' : '£350'),
+                    totalPrice: selectedRegion === 'India' ? '₹40,000' : (selectedRegion === 'Europe' ? '€550' : '$600'),
+                    savings: selectedRegion === 'India' ? '₹25,000' : (selectedRegion === 'Europe' ? '€420' : '$450'),
                     popular: true,
                     features: [
                       'All Inclusive',
@@ -384,10 +411,10 @@ export default function YogaLanding() {
                   },
                   { 
                     title: '6 Months', 
-                    price: selectedCountry === 'IND' ? '₹7,000/month' : (selectedCountry === 'GER' ? '€50/month' : '£41/month'),
+                    price: selectedRegion === 'India' ? '₹7,000/month' : (selectedRegion === 'Europe' ? '€50/month' : '$55/month'),
                     duration: '6 months',
-                    totalPrice: selectedCountry === 'IND' ? '₹22,000' : (selectedCountry === 'GER' ? '€300' : '£250'),
-                    savings: selectedCountry === 'IND' ? '₹7,000' : (selectedCountry === 'GER' ? '€120' : '£100'),
+                    totalPrice: selectedRegion === 'India' ? '₹22,000' : (selectedRegion === 'Europe' ? '€300' : '$330'),
+                    savings: selectedRegion === 'India' ? '₹7,000' : (selectedRegion === 'Europe' ? '€120' : '$130'),
                     features: [
                       'All Inclusive',
                       'All features of Monthly plan',
@@ -432,47 +459,6 @@ export default function YogaLanding() {
                           </li>
                         ))}
                       </ul>
-                      <div className="flex justify-center space-x-4 mb-4">
-                        <Button 
-                          variant={selectedCountry === 'IND' ? 'default' : 'outline'} 
-                          onClick={() => setSelectedCountry('IND')}
-                          className="p-1"
-                        >
-                          <Image
-                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/india.png"
-                            alt="India"
-                            width={30}
-                            height={30}
-                            style={{ width: 'auto', height: 'auto' }}
-                          />
-                        </Button>
-                        <Button 
-                          variant={selectedCountry === 'GER' ? 'default' : 'outline'} 
-                          onClick={() => setSelectedCountry('GER')}
-                          className="p-1"
-                        >
-                          <Image
-                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/germany.png"
-                            alt="Germany"
-                            width={30}
-                            height={30}
-                            style={{ width: 'auto', height: 'auto' }}
-                          />
-                        </Button>
-                        <Button 
-                          variant={selectedCountry === 'UK' ? 'default' : 'outline'} 
-                          onClick={() => setSelectedCountry('UK')}
-                          className="p-1"
-                        >
-                          <Image
-                            src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/united-kingdom.png"
-                            alt="United Kingdom"
-                            width={30}
-                            height={30}
-                            style={{ width: 'auto', height: 'auto' }}
-                          />
-                        </Button>
-                      </div>
                       <Button className="w-full mt-auto">Subscribe Now</Button>
                     </CardContent>
                   </Card>
