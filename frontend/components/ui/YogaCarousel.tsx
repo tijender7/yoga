@@ -39,8 +39,9 @@ const YogaCarousel = () => {
           <Image 
             src={images[currentIndex]} 
             alt={`Student ${currentIndex}`} 
-            layout="fill"
-            objectFit="contain"
+            width={500}
+            height={300}
+            style={{ objectFit: 'contain' }}
           />
         </div>
       </div>

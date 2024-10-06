@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "jsx": "react-jsx",
+      "module": "commonjs",
+      "target": "es5",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "allowSyntheticDefaultImports": true,
+      "noEmit": true,
+      "baseUrl": ".",
+      "paths": {
+        "@/components/*": ["app/components/ui/*"],
+        "@/lib/*": ["app/lib/*"]
+      }
+    },
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules", "dist"]
+  }
+  

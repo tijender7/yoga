@@ -81,3 +81,47 @@ async def create_or_get_razorpay_customer(user_id: str, max_retries=3):
             return None
         await asyncio.sleep(2 ** attempt)  # Exponential backoff
     return None
+
+async def create_subscription(customer_id: str, plan_id: str):
+    try:
+        subscription = client.subscription.create({
+            "plan_id": plan_id,
+            "customer_id": customer_id,
+            "total_count": 12,  # 12 billing cycles
+            "customer_notify": 1
+        })
+        return subscription['id'], subscription['status'], subscription['short_url']
+    except Exception as e:
+        logger.error(f"Error creating subscription: {str(e)}")
+        raise
+
+async def check_subscription_status(subscription_id: str):
+    try:
+        subscription = client.subscription.fetch(subscription_id)
+        return subscription['status']
+    except Exception as e:
+        logger.error(f"Error checking subscription status: {str(e)}")
+        raise
+
+async def fetch_subscription_details(subscription_id: str):
+    try:
+        subscription = client.subscription.fetch(subscription_id)
+        return subscription
+    except Exception as e:
+        logger.error(f"Error fetching subscription details: {str(e)}")
+        raise
+
+async def create_payment_link(amount: int, currency: str = 'INR', description: str = ''):
+    try:
+        payment_link = client.payment_link.create({
+            "amount": amount,
+            "currency": currency,
+            "accept_partial": False,
+            "description": description,
+            "callback_url": "https://your-callback-url.com",
+            "callback_method": "get"
+        })
+        return payment_link['short_url']
+    except Exception as e:
+        logger.error(f"Error creating payment link: {str(e)}")
+        raise

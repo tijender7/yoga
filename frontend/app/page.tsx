@@ -417,8 +417,8 @@ export default function YogaLanding() {
                             src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/india.png"
                             alt="India"
                             width={30}
-                            height={24}
-                            className="rounded"
+                            height={30}
+                            style={{ width: 'auto', height: 'auto' }}
                           />
                         </Button>
                         <Button 
@@ -430,8 +430,8 @@ export default function YogaLanding() {
                             src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/germany.png"
                             alt="Germany"
                             width={30}
-                            height={24}
-                            className="rounded"
+                            height={30}
+                            style={{ width: 'auto', height: 'auto' }}
                           />
                         </Button>
                         <Button 
@@ -443,8 +443,8 @@ export default function YogaLanding() {
                             src="https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/united-kingdom.png"
                             alt="United Kingdom"
                             width={30}
-                            height={24}
-                            className="rounded"
+                            height={30}
+                            style={{ width: 'auto', height: 'auto' }}
                           />
                         </Button>
                       </div>
