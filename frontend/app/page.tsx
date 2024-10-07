@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun, Sunrise, Sunset, Moon, Baby, Dumbbell, Flame } from 'lucide-react'
+import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun, Sunrise, Sunset, Moon, Baby, Dumbbell, Flame, Check } from 'lucide-react'
 import YogaCarousel from '@/components/ui/YogaCarousel'
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
 import StickyJoinForm from '@/components/ui/StickyJoinForm'
@@ -14,12 +14,36 @@ import { ScrollAnimation } from '@/components/ui/ScrollAnimation'
 import BookFreeClass from '@/components/ui/BookFreeClass'
 import { Toaster } from 'sonner'
 import Header from '@/components/ui/Header'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { fetchYogaPricing } from '@/lib/supabase'
+
+interface PricingPlan {
+  id: number;
+  region: string;
+  plan_type: string;
+  monthly_price: number;
+  total_price: number;
+  savings: number;
+  currency: string;
+  strike_price: number;
+  discounted_monthly_price: number;
+  discount_percentage: number;
+}
 
 export default function YogaLanding() {
   const [selectedRegion, setSelectedRegion] = useState('India');
   const [selectedPlan, setSelectedPlan] = useState('Annual');
+  const [pricingData, setPricingData] = useState<PricingPlan[]>([]);
+
+  useEffect(() => {
+    async function loadPricingData() {
+      const data = await fetchYogaPricing(selectedRegion);
+      setPricingData(data);
+    }
+    loadPricingData();
+  }, [selectedRegion]);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header />
@@ -349,123 +373,118 @@ export default function YogaLanding() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
               
               <div className="flex justify-center mb-8">
-                <Tabs defaultValue="India" className="w-full max-w-[300px]">
+                <Tabs defaultValue="India" className="w-full max-w-[300px]" onValueChange={setSelectedRegion}>
                   <TabsList className="grid w-full grid-cols-3 rounded-md bg-white p-1 text-gray-500 shadow-sm">
-                    <TabsTrigger 
-                      value="India" 
-                      onClick={() => setSelectedRegion('India')}
-                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
-                    >
-                      India
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="Europe" 
-                      onClick={() => setSelectedRegion('Europe')}
-                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
-                    >
-                      Europe
-                    </TabsTrigger>
-                    <TabsTrigger 
-                      value="US" 
-                      onClick={() => setSelectedRegion('US')}
-                      className="rounded-sm px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:shadow-sm"
-                    >
-                      US
-                    </TabsTrigger>
+                    <TabsTrigger value="India">India</TabsTrigger>
+                    <TabsTrigger value="Europe">Europe</TabsTrigger>
+                    <TabsTrigger value="US">US</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
 
               <div className="grid gap-6 lg:grid-cols-3">
-                {[
-                  { 
-                    title: 'Monthly', 
-                    price: selectedRegion === 'India' ? '₹4,000' : (selectedRegion === 'Europe' ? '€55' : '$60'),
-                    originalPrice: selectedRegion === 'India' ? '₹6,500' : (selectedRegion === 'Europe' ? '€90' : '$100'),
-                    duration: '1 month',
-                    features: [
-                      'All Inclusive',
-                      '5 days a week, 1 hour sessions',
-                      'Zoom sessions with privacy',
-                      'Hardcore stretching',
-                      'Flexibility training',
-                      'Strength training',
-                      'Posture fix',
-                      'Personalized feel',
-                      'Price increases after first month'
-                    ]
-                  },
-                  { 
-                    title: 'Annual', 
-                    price: selectedRegion === 'India' ? '₹4,000/month' : (selectedRegion === 'Europe' ? '€45/month' : '$50/month'),
-                    duration: '12 months',
-                    totalPrice: selectedRegion === 'India' ? '₹40,000' : (selectedRegion === 'Europe' ? '€550' : '$600'),
-                    savings: selectedRegion === 'India' ? '₹25,000' : (selectedRegion === 'Europe' ? '€420' : '$450'),
-                    popular: true,
-                    features: [
-                      'All Inclusive',
-                      'All features of Monthly plan',
-                      'Best value for money',
-                      'Total cost for 12 months',
-                      'Save compared to monthly plan'
-                    ]
-                  },
-                  { 
-                    title: '6 Months', 
-                    price: selectedRegion === 'India' ? '₹7,000/month' : (selectedRegion === 'Europe' ? '€50/month' : '$55/month'),
-                    duration: '6 months',
-                    totalPrice: selectedRegion === 'India' ? '₹22,000' : (selectedRegion === 'Europe' ? '€300' : '$330'),
-                    savings: selectedRegion === 'India' ? '₹7,000' : (selectedRegion === 'Europe' ? '€120' : '$130'),
-                    features: [
-                      'All Inclusive',
-                      'All features of Monthly plan',
-                      'Discounted rate for 6 months',
-                      'Total cost for 6 months',
-                      'Save compared to monthly plan'
-                    ]
-                  },
-                ].map((plan, index) => (
+                {pricingData.filter(plan => plan.region === selectedRegion).map((plan) => (
                   <Card 
-                    key={index} 
-                    className={`flex flex-col ${selectedPlan === plan.title ? 'border-2 border-primary' : ''}`}
-                    onClick={() => setSelectedPlan(plan.title)}
+                    key={plan.id} 
+                    className={`flex flex-col ${selectedPlan === plan.plan_type ? 'border-2 border-primary' : ''}`}
+                    onClick={() => setSelectedPlan(plan.plan_type)}
                   >
                     <CardHeader>
                       <CardTitle className="text-2xl font-bold text-gray-800">
-                        {plan.title}
-                        {plan.popular && (
+                        {plan.plan_type}
+                        {plan.plan_type === 'Annual' && (
                           <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-primary rounded-full">
                             Most Popular
                           </span>
                         )}
                       </CardTitle>
+                      <p className="text-sm text-gray-600">
+                        {plan.plan_type === 'Monthly' ? 'Billed monthly' : 
+                         `Subscription time: ${plan.plan_type === 'Annual' ? '12 Months' : '6 Months'}`}
+                      </p>
+                      {plan.plan_type !== 'Monthly' && (
+                        <p className="text-sm text-gray-600">Billed monthly</p>
+                      )}
                     </CardHeader>
                     <CardContent className="flex flex-col flex-grow">
                       <div className="mb-4">
-                        <p className="text-4xl font-bold mb-2 text-gray-800">{plan.price}</p>
-                        {plan.originalPrice && (
-                          <p className="text-sm text-gray-500 mb-4">
-                            <span className="line-through">{plan.originalPrice}</span> Limited time offer!
+                        <p className="text-4xl font-bold mb-2 text-gray-800">
+                          {plan.currency}{plan.discounted_monthly_price?.toFixed(2) || '0.00'}/month
+                        </p>
+                        {plan.plan_type === 'Monthly' && (
+                          <>
+                            <p className="text-sm text-gray-500 mb-1">
+                              <span className="line-through">Regular price: {plan.currency}{plan.monthly_price?.toFixed(2) || '0.00'}/month</span>
+                            </p>
+                            <p className="text-sm text-red-500 font-semibold">Limited Time Offer!</p>
+                          </>
+                        )}
+                        {plan.plan_type !== 'Monthly' && (
+                          <p className="text-sm text-green-600">
+                            Save {plan.discount_percentage}% off regular price
                           </p>
-                        )}
-                        <p className="text-sm text-gray-600 mb-4">Billed {plan.duration === '1 month' ? 'monthly' : `every ${plan.duration}`}</p>
-                        {plan.totalPrice && (
-                          <p className="text-lg font-semibold text-gray-700 mb-2">Total: {plan.totalPrice}</p>
-                        )}
-                        {plan.savings && (
-                          <p className="text-lg font-semibold text-green-600 mb-4">You save: {plan.savings}</p>
                         )}
                       </div>
                       <ul className="space-y-2 mb-4 flex-grow">
-                        {plan.features.map((feature, i) => (
-                          <li key={i} className="flex items-center text-gray-700 dark:text-gray-300">
-                            <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
-                            <span>{feature}</span>
-                          </li>
-                        ))}
+                        <li className="flex items-center">
+                          <Check className="mr-2 h-4 w-4 text-green-500" />
+                          <span className="text-sm text-gray-600">All Inclusive</span>
+                        </li>
+                        {plan.plan_type === 'Monthly' && (
+                          <>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">5 days a week, 1 hour sessions</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Zoom sessions with privacy</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Hardcore stretching</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Flexibility training</span>
+                            </li>
+                          </>
+                        )}
+                        {plan.plan_type === 'Annual' && (
+                          <>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Best value for money</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Great for consistent practitioners </span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
+                            </li>
+                          </>
+                        )}
+                        {plan.plan_type === '6 Months' && (
+                          <>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Discounted rate for 6 months</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Great for Beginners</span>
+                            </li>
+                            <li className="flex items-center">
+                              <Check className="mr-2 h-4 w-4 text-green-500" />
+                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
+                            </li>
+                          </>
+                        )}
                       </ul>
                       <Button className="w-full mt-auto" onClick={(e) => {
-                        e.stopPropagation(); // Prevent card click event
+                        e.stopPropagation();
                         // Your subscribe logic here
                       }}>Subscribe Now</Button>
                     </CardContent>
