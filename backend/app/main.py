@@ -6,6 +6,7 @@ import logging
 import json
 from fastapi.middleware.cors import CORSMiddleware
 from razorpay.errors import SignatureVerificationError
+import os
 
 import razorpay
 from app.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
@@ -24,7 +25,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:3000"],  # Add your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -191,34 +192,70 @@ async def update_subscription_status(subscription_id: str, status: str):
 
 @app.post("/api/create-subscription")
 async def create_subscription_endpoint(subscription_data: dict):
-    logger.info(f"Received subscription request: {subscription_data}")
+    logger.info(f"[START] Received subscription request: {subscription_data}")
     user_id = subscription_data.get('customerId')
-    plan_id = subscription_data.get('planId')
+    plan_type = subscription_data.get('planType')
+    region = subscription_data.get('region')
     
-    if not user_id or not plan_id:
-        logger.error(f"User ID or Plan ID missing. Data received: {subscription_data}")
-        raise HTTPException(status_code=400, detail="User ID and Plan ID are required")
+    if not user_id or not plan_type or not region:
+        logger.error(f"[ERROR] Missing data. Received: {subscription_data}")
+        raise HTTPException(status_code=400, detail="User ID, Plan Type, and Region are required")
 
     try:
-        # Fetch Razorpay customer ID from razorpay_customers table
-        customer_response = supabase.table('razorpay_customers').select('razorpay_customer_id').eq('id', user_id).execute()
-        if not customer_response.data:
-            logger.error(f"No Razorpay customer found for user {user_id}")
-            raise HTTPException(status_code=404, detail="Razorpay customer not found")
+        logger.info(f"[STEP 1] Fetching subscription_plan_id for plan_type: {plan_type} and region: {region}")
+        yoga_pricing_response = supabase.table('yoga_pricing').select('subscription_plan_id').eq('plan_type', plan_type).eq('region', region).execute()
+        logger.info(f"[STEP 1] Yoga pricing response: {yoga_pricing_response}")
         
-        razorpay_customer_id = customer_response.data[0]['razorpay_customer_id']
-        logger.info(f"Found Razorpay customer ID: {razorpay_customer_id} for user {user_id}")
+        if not yoga_pricing_response.data:
+            logger.error(f"[ERROR] No pricing plan found for plan type {plan_type} and region {region}")
+            raise HTTPException(status_code=404, detail="Pricing plan not found")
+        
+        subscription_plan_id = yoga_pricing_response.data[0]['subscription_plan_id']
+        logger.info(f"[STEP 1] Fetched subscription_plan_id: {subscription_plan_id}")
+        
+        if subscription_plan_id is None:
+            logger.error(f"[ERROR] subscription_plan_id is None for plan type {plan_type} and region {region}")
+            raise HTTPException(status_code=400, detail="Invalid subscription plan")
 
-        logger.info(f"Creating subscription for customer {razorpay_customer_id} with plan {plan_id}")
-        subscription_id, status, payment_link = await create_subscription(razorpay_customer_id, plan_id)
-        logger.info(f"Subscription created: {subscription_id}, Status: {status}, Payment link: {payment_link}")
+        logger.info(f"[STEP 2] Fetching Razorpay plan ID for subscription_plan_id: {subscription_plan_id}")
+        plan_response = supabase.table('subscription_plans').select('razorpay_plan_id').eq('id', subscription_plan_id).execute()
+        logger.info(f"[STEP 2] Subscription plan response: {plan_response}")
+        
+        if not plan_response.data:
+            logger.error(f"[ERROR] No Razorpay plan found for subscription_plan_id {subscription_plan_id}")
+            raise HTTPException(status_code=404, detail="Razorpay plan not found")
+        
+        razorpay_plan_id = plan_response.data[0]['razorpay_plan_id']
+        logger.info(f"[STEP 2] Fetched razorpay_plan_id: {razorpay_plan_id}")
+
+        logger.info(f"[STEP 3] Fetching Razorpay customer ID for user: {user_id}")
+        customer_response = supabase.table('razorpay_customers').select('razorpay_customer_id').eq('id', user_id).execute()
+        logger.info(f"[STEP 3] Customer response: {customer_response}")
+
+        if not customer_response.data:
+            logger.error(f"[ERROR] No Razorpay customer found for user {user_id}")
+            raise HTTPException(status_code=404, detail="Razorpay customer not found")
+
+        razorpay_customer_id = customer_response.data[0]['razorpay_customer_id']
+        logger.info(f"[STEP 3] Fetched razorpay_customer_id: {razorpay_customer_id}")
+
+        logger.info(f"[STEP 4] Creating subscription for customer: {razorpay_customer_id} with plan: {razorpay_plan_id}")
+        subscription_id, status, payment_link = await create_subscription(razorpay_customer_id, razorpay_plan_id)
+        logger.info(f"[STEP 4] Subscription created: {subscription_id}, Status: {status}, Payment link: {payment_link}")
 
         if status == 'created' and payment_link:
-            return {"status": "success", "subscription_id": subscription_id, "payment_link": payment_link}
+            logger.info("[SUCCESS] Subscription process completed successfully")
+            return {
+                "status": "success", 
+                "subscription_id": subscription_id, 
+                "payment_link": payment_link,
+                "razorpay_key": os.getenv("RAZORPAY_KEY_ID")  # Add this line
+            }
         else:
+            logger.error(f"[ERROR] Subscription created but status is {status}")
             return {"status": "error", "message": f"Subscription created but status is {status}"}
     except Exception as e:
-        logger.error(f"Error creating subscription: {str(e)}", exc_info=True)
+        logger.error(f"[CRITICAL ERROR] Error creating subscription: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.get("/api/check-subscription/{subscription_id}")

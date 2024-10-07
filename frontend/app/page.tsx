@@ -17,6 +17,8 @@ import Header from '@/components/ui/Header'
 import { useState, useEffect } from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { fetchYogaPricing } from '@/lib/supabase'
+import { handleSubscribeNow } from '@/lib/subscriptionActions'
+import { supabase } from '@/lib/supabase'
 
 interface PricingPlan {
   id: number;
@@ -43,6 +45,25 @@ export default function YogaLanding() {
     }
     loadPricingData();
   }, [selectedRegion]);
+
+  const handleSubscribeClick = async (planType: string, region: string) => {
+    const user = await supabase.auth.getUser()
+    if (!user.data.user) {
+      console.log('User not logged in')
+      // Redirect to login page or show login modal
+      return
+    }
+
+    try {
+      const paymentLink = await handleSubscribeNow(user.data.user.id, planType, region)
+      if (paymentLink) {
+        window.location.href = paymentLink
+      }
+    } catch (error) {
+      console.error('Subscription failed:', error)
+      // Show error message to user
+    }
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -483,10 +504,9 @@ export default function YogaLanding() {
                           </>
                         )}
                       </ul>
-                      <Button className="w-full mt-auto" onClick={(e) => {
-                        e.stopPropagation();
-                        // Your subscribe logic here
-                      }}>Subscribe Now</Button>
+                      <Button onClick={() => handleSubscribeClick(plan.plan_type, selectedRegion)} className="w-full">
+                        Subscribe Now
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
