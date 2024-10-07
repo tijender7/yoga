@@ -1,24 +1,28 @@
-"use client"
+// pages/page.tsx (or pages/index.tsx depending on your setup)
 
-import Image from 'next/image'
-import Link from 'next/link'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun, Sunrise, Sunset, Moon, Baby, Dumbbell, Flame, Check } from 'lucide-react'
-import YogaCarousel from '@/components/ui/YogaCarousel'
-import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground'
-import StickyJoinForm from '@/components/ui/StickyJoinForm'
-import { ScrollAnimation } from '@/components/ui/ScrollAnimation'
-import BookFreeClass from '@/components/ui/BookFreeClass'
-import { Toaster } from 'sonner'
-import Header from '@/components/ui/Header'
-import { useState, useEffect } from 'react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { fetchYogaPricing } from '@/lib/supabase'
-import { handleSubscribeNow } from '@/lib/subscriptionActions'
-import { supabase } from '@/lib/supabase'
+"use client";
+
+import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Facebook, Instagram, MessageCircle, Star, CheckCircle2, Leaf, Heart, Users, Shield, Clock, Zap, Brain, Sun, Sunrise, Sunset, Moon, Baby, Dumbbell, Flame, Check } from 'lucide-react';
+import YogaCarousel from '@/components/ui/YogaCarousel';
+import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground';
+import StickyJoinForm from '@/components/ui/StickyJoinForm';
+import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
+
+import BookFreeClass from '@/components/ui/BookFreeClass';
+import { Toaster } from 'sonner';
+import Header from '@/components/ui/Header';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { fetchYogaPricing } from '@/lib/supabase';
+import { handleSubscribeNow } from '@/lib/subscriptionActions';
+import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
+import PricingSection from '@/components/PricingSection'; // Import the new PricingSection component
 
 interface PricingPlan {
   id: number;
@@ -34,36 +38,7 @@ interface PricingPlan {
 }
 
 export default function YogaLanding() {
-  const [selectedRegion, setSelectedRegion] = useState('India');
-  const [selectedPlan, setSelectedPlan] = useState('Annual');
-  const [pricingData, setPricingData] = useState<PricingPlan[]>([]);
-
-  useEffect(() => {
-    async function loadPricingData() {
-      const data = await fetchYogaPricing(selectedRegion);
-      setPricingData(data);
-    }
-    loadPricingData();
-  }, [selectedRegion]);
-
-  const handleSubscribeClick = async (planType: string, region: string) => {
-    const user = await supabase.auth.getUser()
-    if (!user.data.user) {
-      console.log('User not logged in')
-      // Redirect to login page or show login modal
-      return
-    }
-
-    try {
-      const paymentLink = await handleSubscribeNow(user.data.user.id, planType, region)
-      if (paymentLink) {
-        window.location.href = paymentLink
-      }
-    } catch (error) {
-      console.error('Subscription failed:', error)
-      // Show error message to user
-    }
-  }
+  // Remove pricing-related state and functions from here
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -233,84 +208,8 @@ export default function YogaLanding() {
           </section>
         </ScrollAnimation>
         
-        <ScrollAnimation>
-          <section id="services" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-            <div className="container px-4 md:px-6">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Yoga Classes Tailored for You</h2>
-              <p className="text-xl text-center text-gray-600 mb-12">Transform your life with our specialized yoga programs</p>
-              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {[
-                  {
-                    title: 'Stress Relief Yoga',
-                    description: 'Struggling with daily stress and anxiety?',
-                    icon: Brain,
-                    benefits: ['Reduce stress levels', 'Improve mental clarity', 'Enhance emotional well-being'],
-                    forWhom: 'Perfect for busy professionals and anyone feeling overwhelmed'
-                  },
-                  {
-                    title: 'Flexibility & Strength',
-                    description: 'Feeling stiff or weak?',
-                    icon: Dumbbell,
-                    benefits: ['Increase flexibility', 'Build lean muscle', 'Improve posture'],
-                    forWhom: 'Ideal for those looking to enhance physical fitness'
-                  },
-                  {
-                    title: 'Mindful Meditation',
-                    description: 'Trouble focusing or sleeping?',
-                    icon: Moon,
-                    benefits: ['Enhance concentration', 'Improve sleep quality', 'Cultivate inner peace'],
-                    forWhom: 'Great for anyone seeking mental balance and relaxation'
-                  },
-                  {
-                    title: 'Gentle Yoga for Seniors',
-                    description: 'Concerned about joint health and mobility?',
-                    icon: Heart,
-                    benefits: ['Enhance mobility', 'Reduce joint pain', 'Improve overall well-being'],
-                    forWhom: 'Tailored for seniors and those with limited mobility'
-                  },
-                  {
-                    title: 'Prenatal Yoga',
-                    description: 'Expecting and want to stay active safely?',
-                    icon: Baby,
-                    benefits: ['Ease pregnancy discomforts', 'Prepare for childbirth', 'Connect with your baby'],
-                    forWhom: 'Designed for expectant mothers at all stages of pregnancy'
-                  },
-                  {
-                    title: 'Weight Management Yoga',
-                    description: 'Struggling with weight issues?',
-                    icon: Flame,
-                    benefits: ['Boost metabolism', 'Improve body composition', 'Increase energy levels'],
-                    forWhom: 'Perfect for those on a weight loss or maintenance journey'
-                  },
-                ].map((classType, index) => (
-                  <Card key={index} className="flex flex-col h-full">
-                    <CardHeader>
-                      <div className="flex items-center space-x-4">
-                        <div className="p-2 bg-primary rounded-full">
-                          <classType.icon className="w-6 h-6 text-white" />
-                        </div>
-                        <CardTitle className="text-xl font-bold">{classType.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                      <p className="text-gray-600 mb-4 font-semibold">{classType.description}</p>
-                      <h4 className="font-semibold mb-2">Benefits:</h4>
-                      <ul className="list-disc list-inside text-sm text-gray-600 mb-4">
-                        {classType.benefits.map((benefit, i) => (
-                          <li key={i}>{benefit}</li>
-                        ))}
-                      </ul>
-                      <p className="text-sm text-gray-500 italic">{classType.forWhom}</p>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Join This Program</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </section>
-        </ScrollAnimation>
+        {/* Insert the new PricingSection component here */}
+        <PricingSection />
         
         <ScrollAnimation>
           <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
@@ -384,133 +283,6 @@ export default function YogaLanding() {
                 Join our community today and start your journey towards a healthier, more balanced you.
               </p>
               <Button size="lg">Get Started</Button>
-            </div>
-          </section>
-        </ScrollAnimation>
-        
-        <ScrollAnimation>
-          <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
-              
-              <div className="flex justify-center mb-8">
-                <Tabs defaultValue="India" className="w-full max-w-[300px]" onValueChange={setSelectedRegion}>
-                  <TabsList className="grid w-full grid-cols-3 rounded-md bg-white p-1 text-gray-500 shadow-sm">
-                    <TabsTrigger value="India">India</TabsTrigger>
-                    <TabsTrigger value="Europe">Europe</TabsTrigger>
-                    <TabsTrigger value="US">US</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
-
-              <div className="grid gap-6 lg:grid-cols-3">
-                {pricingData.filter(plan => plan.region === selectedRegion).map((plan) => (
-                  <Card 
-                    key={plan.id} 
-                    className={`flex flex-col ${selectedPlan === plan.plan_type ? 'border-2 border-primary' : ''}`}
-                    onClick={() => setSelectedPlan(plan.plan_type)}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold text-gray-800">
-                        {plan.plan_type}
-                        {plan.plan_type === 'Annual' && (
-                          <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-                            Most Popular
-                          </span>
-                        )}
-                      </CardTitle>
-                      <p className="text-sm text-gray-600">
-                        {plan.plan_type === 'Monthly' ? 'Billed monthly' : 
-                         `Subscription time: ${plan.plan_type === 'Annual' ? '12 Months' : '6 Months'}`}
-                      </p>
-                      {plan.plan_type !== 'Monthly' && (
-                        <p className="text-sm text-gray-600">Billed monthly</p>
-                      )}
-                    </CardHeader>
-                    <CardContent className="flex flex-col flex-grow">
-                      <div className="mb-4">
-                        <p className="text-4xl font-bold mb-2 text-gray-800">
-                          {plan.currency}{plan.discounted_monthly_price?.toFixed(2) || '0.00'}/month
-                        </p>
-                        {plan.plan_type === 'Monthly' && (
-                          <>
-                            <p className="text-sm text-gray-500 mb-1">
-                              <span className="line-through">Regular price: {plan.currency}{plan.monthly_price?.toFixed(2) || '0.00'}/month</span>
-                            </p>
-                            <p className="text-sm text-red-500 font-semibold">Limited Time Offer!</p>
-                          </>
-                        )}
-                        {plan.plan_type !== 'Monthly' && (
-                          <p className="text-sm text-green-600">
-                            Save {plan.discount_percentage}% off regular price
-                          </p>
-                        )}
-                      </div>
-                      <ul className="space-y-2 mb-4 flex-grow">
-                        <li className="flex items-center">
-                          <Check className="mr-2 h-4 w-4 text-green-500" />
-                          <span className="text-sm text-gray-600">All Inclusive</span>
-                        </li>
-                        {plan.plan_type === 'Monthly' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">5 days a week, 1 hour sessions</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Zoom sessions with privacy</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Hardcore stretching</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Flexibility training</span>
-                            </li>
-                          </>
-                        )}
-                        {plan.plan_type === 'Annual' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Best value for money</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Great for consistent practitioners </span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
-                            </li>
-                          </>
-                        )}
-                        {plan.plan_type === '6 Months' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Discounted rate for 6 months</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Great for Beginners</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                      <Button onClick={() => handleSubscribeClick(plan.plan_type, selectedRegion)} className="w-full">
-                        Subscribe Now
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
             </div>
           </section>
         </ScrollAnimation>
@@ -591,6 +363,7 @@ export default function YogaLanding() {
           </div>
         </div>
       </footer>
+      <Toaster /> {/* Ensure Toaster is included if used across the app */}
     </div>
-  )
+  );
 }
