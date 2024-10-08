@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Check } from 'lucide-react';
-import { fetchYogaPricing } from '@/lib/supabase';
-import { handleSubscribeNow } from '@/lib/subscriptionActions';
+import { fetchYogaPricing, handleSubscribeNow, checkSubscriptionStatus } from '@/lib/subscriptionActions';
 import { supabase } from '@/lib/supabase';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
+
+
 
 interface PricingPlan {
   id: number;
@@ -58,13 +59,18 @@ const PricingSection: React.FC = () => {
     }
 
     try {
-      const paymentLink = await handleSubscribeNow(user.id, planType, region);
-      if (paymentLink) {
-        window.location.href = paymentLink;
+      await handleSubscribeNow(user.id, planType, region);
+      const status = await checkSubscriptionStatus(user.id);
+      if (status === 'active') {
+        // Show success message or redirect to a success page
+        alert('Your subscription is now active!');
+      } else {
+        // Show pending message
+        alert("our payment is being processed. We'll update you soon.");
       }
     } catch (error) {
       console.error('Subscription failed:', error);
-      // TODO: Show error message to user, possibly using Toaster
+      // Show error message to user
     }
   };
 

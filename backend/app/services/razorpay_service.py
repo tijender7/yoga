@@ -3,7 +3,9 @@ from app.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET
 from app.db import supabase
 import asyncio
 import logging
-
+from fastapi import HTTPException
+from datetime import datetime, timedelta
+import uuid
 logger = logging.getLogger(__name__)
 
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
@@ -95,13 +97,26 @@ async def create_subscription(customer_id: str, plan_id: str):
         logger.error(f"Error creating subscription: {str(e)}")
         raise
 
-async def check_subscription_status(subscription_id: str):
+async def check_subscription_status(user_id: str):
+    logger.info(f"[START] Checking subscription status for user: {user_id}")
     try:
-        subscription = client.subscription.fetch(subscription_id)
-        return subscription['status']
+        # Fetch the user's subscription from your database
+        subscription = await supabase.table('subscriptions').select('*').eq('user_id', user_id).single().execute()
+        logger.info(f"[INFO] Supabase response: {subscription}")
+        
+        if subscription.data:
+            # If subscription exists, return its status
+            status = subscription.data.get('status', 'unknown')
+            logger.info(f"[SUCCESS] Subscription status for user {user_id}: {status}")
+            return status
+        else:
+            # If no subscription found, return 'inactive' instead of raising an exception
+            logger.info(f"[INFO] No subscription found for user {user_id}")
+            return 'inactive'
     except Exception as e:
-        logger.error(f"Error checking subscription status: {str(e)}")
-        raise
+        logger.error(f"[ERROR] Error checking subscription status: {str(e)}")
+        # Return 'error' instead of raising an exception
+        return 'error'
 
 async def fetch_subscription_details(subscription_id: str):
     try:
@@ -124,4 +139,21 @@ async def create_payment_link(amount: int, currency: str = 'INR', description: s
         return payment_link['short_url']
     except Exception as e:
         logger.error(f"Error creating payment link: {str(e)}")
+        raise
+
+async def insert_subscription(user_id: str, subscription_id: str, plan_id: str, status: str):
+    try:
+        subscription_data = {
+            'user_id': user_id,
+            'subscription_id': subscription_id,
+            'plan_id': str(uuid.UUID(plan_id)),
+            'status': status,
+            'start_date': datetime.now().isoformat(),
+            'end_date': (datetime.now() + timedelta(days=365)).isoformat(),  # Assuming 1-year subscription
+        }
+        result = await supabase.table('subscriptions').insert(subscription_data).execute()
+        logger.info(f"[SUCCESS] Subscription inserted for user {user_id}: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"[ERROR] Failed to insert subscription: {str(e)}")
         raise

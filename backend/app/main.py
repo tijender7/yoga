@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
-from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link
+from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription
 from app.db import supabase
 import logging
 import json
 from fastapi.middleware.cors import CORSMiddleware
 from razorpay.errors import SignatureVerificationError
 import os
+from datetime import datetime, timedelta
 
 import razorpay
 from app.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
@@ -155,38 +156,16 @@ async def test_endpoint():
 
 @app.post("/webhook/razorpay")
 async def razorpay_webhook(request: Request):
-    payload = await request.json()
-    signature = request.headers.get("X-Razorpay-Signature", "")
-
-    try:
-        client.utility.verify_webhook_signature(json.dumps(payload, separators=(',', ':')), signature, RAZORPAY_WEBHOOK_SECRET)
-    except SignatureVerificationError:
-        logger.error("Invalid webhook signature")
-        raise HTTPException(status_code=400, detail="Invalid signature")
-
-    # Handle different event types
-    event = payload.get('event')
-    if event == 'subscription.charged':
-        # Handle successful subscription charge
-        subscription_id = payload['payload']['subscription']['entity']['id']
-        # Update subscription status in your database
-        await update_subscription_status(subscription_id, 'active')
-    elif event == 'subscription.cancelled':
-        # Handle subscription cancellation
-        subscription_id = payload['payload']['subscription']['entity']['id']
-        await update_subscription_status(subscription_id, 'cancelled')
-    
+    # Implement your webhook handling logic here
     return {"status": "success"}
 
 async def update_subscription_status(subscription_id: str, status: str):
     try:
         result = await supabase.table('subscriptions').update({
-            'status': status
+            'status': status,
+            'updated_at': datetime.utcnow().isoformat()
         }).eq('subscription_id', subscription_id).execute()
-        if result.error:
-            logger.error(f"Failed to update subscription status: {result.error}")
-        else:
-            logger.info(f"Updated subscription status for {subscription_id} to {status}")
+        logger.info(f"Updated subscription status for {subscription_id} to {status}")
     except Exception as e:
         logger.error(f"Failed to update subscription status: {str(e)}")
 
@@ -249,7 +228,8 @@ async def create_subscription_endpoint(subscription_data: dict):
                 "status": "success", 
                 "subscription_id": subscription_id, 
                 "payment_link": payment_link,
-                "razorpay_key": os.getenv("RAZORPAY_KEY_ID")  # Add this line
+                "razorpay_key": os.getenv("RAZORPAY_KEY_ID"),  # Add this line
+                "razorpay_plan_id": razorpay_plan_id  # Add this line
             }
         else:
             logger.error(f"[ERROR] Subscription created but status is {status}")
@@ -258,11 +238,59 @@ async def create_subscription_endpoint(subscription_data: dict):
         logger.error(f"[CRITICAL ERROR] Error creating subscription: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
-@app.get("/api/check-subscription/{subscription_id}")
-async def check_subscription_endpoint(subscription_id: str):
+@app.post("/api/check-subscription-status")
+async def check_subscription_endpoint(subscription_data: dict):
+    logger.info(f"[START] Checking subscription status. Data: {subscription_data}")
     try:
-        status = await check_subscription_status(subscription_id)
+        user_id = subscription_data.get('userId')
+        if not user_id:
+            logger.error("[ERROR] userId is required")
+            raise HTTPException(status_code=400, detail="userId is required")
+        
+        logger.info(f"[INFO] Checking subscription status for user: {user_id}")
+        status = await check_subscription_status(user_id)
+        logger.info(f"[SUCCESS] Subscription status for user {user_id}: {status}")
         return {"status": "success", "subscription_status": status}
     except Exception as e:
-        logger.error(f"Error checking subscription status: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"[ERROR] Error checking subscription status: {str(e)}")
+        return {"status": "error", "subscription_status": "unknown", "message": str(e)}
+
+@app.post("/api/insert-subscription")
+async def insert_subscription_endpoint(subscription_data: dict):
+    logger.info(f"[START] Inserting subscription. Data: {subscription_data}")
+    try:
+        user_id = subscription_data.get('userId')
+        subscription_id = subscription_data.get('subscriptionId')
+        plan_type = subscription_data.get('planType')
+        region = subscription_data.get('region')
+        razorpay_plan_id = subscription_data.get('razorpayPlanId')
+        
+        if not all([user_id, subscription_id, plan_type, region, razorpay_plan_id]):
+            raise HTTPException(status_code=400, detail="Missing required data")
+        
+        # Fetch plan_id from subscription_plans table
+        plan_response = supabase.table('subscription_plans').select('id').eq('razorpay_plan_id', razorpay_plan_id).execute()
+        if not plan_response.data:
+            raise HTTPException(status_code=404, detail="Subscription plan not found")
+        plan_id = plan_response.data[0]['id']
+        
+        # Fetch subscription details from Razorpay
+        subscription_details = await fetch_subscription_details(subscription_id)
+        status = subscription_details.get('status', 'unknown')
+        
+        # Insert subscription into database
+        subscription_data = {
+            'user_id': user_id,
+            'plan_id': plan_id,
+            'razorpay_subscription_id': subscription_id,
+            'status': status,
+            'start_date': datetime.now().isoformat(),
+            'end_date': (datetime.now() + timedelta(days=365)).isoformat(),  # Assuming 1-year subscription
+        }
+        result = supabase.table('subscriptions').insert(subscription_data).execute()
+        
+        logger.info(f"[SUCCESS] Subscription inserted: {result}")
+        return {"status": "success"}
+    except Exception as e:
+        logger.error(f"[ERROR] Failed to insert subscription: {str(e)}")
+        return {"status": "error", "message": str(e)}
