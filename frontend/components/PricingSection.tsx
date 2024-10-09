@@ -10,8 +10,7 @@ import { Check } from 'lucide-react';
 import { fetchYogaPricing, handleSubscribeNow, checkSubscriptionStatus } from '@/lib/subscriptionActions';
 import { supabase } from '@/lib/supabase';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
-
-
+import { Loader2 } from 'lucide-react';
 
 interface PricingPlan {
   id: number;
@@ -32,6 +31,8 @@ const PricingSection: React.FC = () => {
   const [pricingData, setPricingData] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPricingData() {
@@ -51,26 +52,36 @@ const PricingSection: React.FC = () => {
   }, [selectedRegion]);
 
   const handleSubscribeClick = async (planType: string, region: string) => {
+    setLoadingPlan(planType);
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       console.log('User not logged in');
+      setLoadingPlan(null);
       // TODO: Implement redirection to login or show login modal
       return;
     }
 
     try {
-      await handleSubscribeNow(user.id, planType, region);
       const status = await checkSubscriptionStatus(user.id);
+      const isDevEnvironment = process.env.NEXT_PUBLIC_ENV === 'development';
+
       if (status === 'active') {
-        // Show success message or redirect to a success page
-        alert('Your subscription is now active!');
-      } else {
-        // Show pending message
-        alert("our payment is being processed. We'll update you soon.");
+        if (isDevEnvironment) {
+          alert('You have an active subscription, but as this is a development environment, you can proceed with testing a new subscription.');
+        } else {
+          alert('You already have an active subscription.');
+          setLoadingPlan(null);
+          return;
+        }
       }
+
+      await handleSubscribeNow(user.id, planType, region);
+      // The success message will be handled in the handleSubscribeNow function
     } catch (error) {
       console.error('Subscription failed:', error);
-      // Show error message to user
+      alert('An error occurred while processing your subscription. Please try again.');
+    } finally {
+      setLoadingPlan(null);
     }
   };
 
@@ -198,8 +209,16 @@ const PricingSection: React.FC = () => {
                     <Button 
                       onClick={() => handleSubscribeClick(plan.plan_type, selectedRegion)} 
                       className="w-full"
+                      disabled={loadingPlan === plan.plan_type}
                     >
-                      Subscribe Now
+                      {loadingPlan === plan.plan_type ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        'Subscribe Now'
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

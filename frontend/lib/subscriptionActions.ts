@@ -33,7 +33,12 @@ export async function handleSubscribeNow(userId: string, planType: string, regio
         handler: async function (response: any) {
           console.log('[SUCCESS] Payment initiated:', response);
           alert('Payment initiated. We will update you once it is confirmed.');
-          await pollSubscriptionStatus(userId);
+          const status = await pollSubscriptionStatus(userId);
+          if (status === 'active') {
+            alert('Your subscription is now active!');
+          } else {
+            alert('Your subscription is still being processed. Please check again later.');
+          }
         },
         theme: {
           color: "#3399cc"
