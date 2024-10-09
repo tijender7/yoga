@@ -7,6 +7,9 @@ from fastapi import HTTPException
 from datetime import datetime, timedelta
 import uuid
 logger = logging.getLogger(__name__)
+from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL, NGROK_URL
+import json
+
 
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
@@ -100,22 +103,32 @@ async def create_subscription(customer_id: str, plan_id: str):
 async def check_subscription_status(user_id: str):
     logger.info(f"[START] Checking subscription status for user: {user_id}")
     try:
-        # Fetch the user's subscription from your database
-        subscription = await supabase.table('subscriptions').select('*').eq('user_id', user_id).single().execute()
-        logger.info(f"[INFO] Supabase response: {subscription}")
+        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).order('created_at', desc=True).limit(1).execute()
+        logger.info(f"[INFO] Supabase response: {json.dumps(subscription_response.data, indent=2)}")
         
-        if subscription.data:
-            # If subscription exists, return its status
-            status = subscription.data.get('status', 'unknown')
-            logger.info(f"[SUCCESS] Subscription status for user {user_id}: {status}")
-            return status
+        if subscription_response.data and len(subscription_response.data) > 0:
+            subscription_id = subscription_response.data[0].get('razorpay_subscription_id')
+            logger.info(f"[INFO] Fetching Razorpay subscription: {subscription_id}")
+            razorpay_subscription = client.subscription.fetch(subscription_id)
+            logger.info(f"[INFO] Razorpay subscription data: {json.dumps(razorpay_subscription, indent=2)}")
+            razorpay_status = razorpay_subscription['status']
+            logger.info(f"[INFO] Razorpay status for subscription {subscription_id}: {razorpay_status}")
+            
+            if razorpay_status != subscription_response.data[0].get('status'):
+                logger.info(f"[INFO] Status mismatch. Updating database from {subscription_response.data[0].get('status')} to {razorpay_status}")
+                update_result = supabase.table('subscriptions').update({'status': razorpay_status}).eq('razorpay_subscription_id', subscription_id).execute()
+                if update_result.data:
+                    logger.info(f"[INFO] Updated subscription status in database to {razorpay_status}")
+                    logger.info(f"[INFO] Update result: {json.dumps(update_result.data, indent=2)}")
+                else:
+                    logger.error(f"[ERROR] Failed to update subscription status in database: {update_result.error}")
+            
+            return razorpay_status
         else:
-            # If no subscription found, return 'inactive' instead of raising an exception
             logger.info(f"[INFO] No subscription found for user {user_id}")
             return 'inactive'
     except Exception as e:
         logger.error(f"[ERROR] Error checking subscription status: {str(e)}")
-        # Return 'error' instead of raising an exception
         return 'error'
 
 async def fetch_subscription_details(subscription_id: str):
@@ -133,7 +146,7 @@ async def create_payment_link(amount: int, currency: str = 'INR', description: s
             "currency": currency,
             "accept_partial": False,
             "description": description,
-            "callback_url": "https://your-callback-url.com",
+            "callback_url": RAZORPAY_CALLBACK_URL,
             "callback_method": "get"
         })
         return payment_link['short_url']
@@ -156,4 +169,26 @@ async def insert_subscription(user_id: str, subscription_id: str, plan_id: str, 
         return result
     except Exception as e:
         logger.error(f"[ERROR] Failed to insert subscription: {str(e)}")
+        raise
+
+async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
+    logger.info(f"[WEBHOOK] Updating subscription status: {subscription_id} to {status}")
+    try:
+        update_data = {
+            'status': status,
+            'updated_at': datetime.now().isoformat()
+        }
+        if payment_id:
+            update_data['last_payment_id'] = payment_id
+
+        result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
+        
+        if result.data:
+            logger.info(f"[WEBHOOK] Subscription status updated successfully: {subscription_id} - {status}")
+        else:
+            logger.error(f"[WEBHOOK] Error updating subscription status: {result.error}")
+        
+        return result.data
+    except Exception as e:
+        logger.error(f"[WEBHOOK] Failed to update subscription status: {str(e)}")
         raise

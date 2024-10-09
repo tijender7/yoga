@@ -1,11 +1,12 @@
 import { supabase } from './supabase'
-import { loadRazorpay } from './razorpayLoader'; // Ye function hum agle step mein create karenge
+import { loadRazorpay } from './razorpayLoader'; 
+import { API_BASE_URL } from '../config';// Ye function hum agle step mein create karenge
 
 export async function handleSubscribeNow(userId: string, planType: string, region: string) {
   console.log(`[START] Subscribe button clicked for user: ${userId}, plan type: ${planType}, region: ${region}`);
 
   try {
-    const response = await fetch('http://localhost:8000/api/create-subscription', {
+    const response = await fetch(`${API_BASE_URL}/api/create-subscription`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,6 +21,8 @@ export async function handleSubscribeNow(userId: string, planType: string, regio
     const data = await response.json();
     console.log('[SUCCESS] Subscription created:', data);
 
+    console.log('[WEBHOOK] Subscription created, waiting for webhook event');
+
     if (data.status === 'success' && data.payment_link) {
       const Razorpay = await loadRazorpay();
       const options = {
@@ -28,25 +31,26 @@ export async function handleSubscribeNow(userId: string, planType: string, regio
         name: "YogaHarmony",
         description: `${planType} Subscription`,
         handler: async function (response: any) {
-          console.log('[SUCCESS] Payment successful:', response);
-          // Insert subscription details after successful payment
-          const insertResult = await insertSubscriptionDetails(userId, data.subscription_id, planType, region, data.razorpay_plan_id);
-          if (insertResult.status === 'success') {
-            alert('Payment successful! Your subscription is now active.');
-          } else {
-            alert('Payment received. Your subscription will be activated soon.');
-          }
+          console.log('[SUCCESS] Payment initiated:', response);
+          alert('Payment initiated. We will update you once it is confirmed.');
+          await pollSubscriptionStatus(userId);
+        },
+        theme: {
+          color: "#3399cc"
         }
       };
 
       const rzp = new Razorpay(options);
+      rzp.on('payment.failed', function (response: any){
+        alert('Payment failed. Please try again.');
+      });
       rzp.open();
     } else {
       throw new Error('Failed to create subscription');
     }
   } catch (error) {
     console.error('[ERROR] Error in handleSubscribeNow:', error);
-    alert('An error occurred. Please try again.');
+    throw error;
   }
 }
 
@@ -70,10 +74,12 @@ async function openRazorpayCheckout(subscriptionId: string, razorpayKey: string)
   console.log('[END] Razorpay checkout opened');
 }
 
+
+
 export async function checkSubscriptionStatus(userId: string) {
   console.log(`[START] Checking subscription status for user: ${userId}`);
   try {
-    const response = await fetch('http://localhost:8000/api/check-subscription-status', {
+    const response = await fetch(`${API_BASE_URL}/api/check-subscription-status`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,12 +90,13 @@ export async function checkSubscriptionStatus(userId: string) {
     console.log(`[INFO] Response status: ${response.status}`);
 
     const data = await response.json();
+    console.log(`[INFO] Response data:`, data);
 
     if (response.ok) {
       console.log(`[SUCCESS] Subscription status: ${data.subscription_status}`);
       return data.subscription_status;
     } else {
-      console.error(`[ERROR] HTTP error! status: ${response.status}`);
+      console.error(`[ERROR] HTTP error! status: ${response.status}, message: ${data.message}`);
       return 'error';
     }
   } catch (error) {
@@ -115,10 +122,12 @@ export async function fetchYogaPricing(region: string) {
     return data
   }
 
+ 
+
 async function insertSubscriptionDetails(userId: string, subscriptionId: string, planType: string, region: string, razorpayPlanId: string) {
   console.log(`[START] Inserting subscription details for user: ${userId}`);
   try {
-    const response = await fetch('http://localhost:8000/api/insert-subscription', {
+    const response = await fetch(`${API_BASE_URL}/api/insert-subscription`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -137,4 +146,21 @@ async function insertSubscriptionDetails(userId: string, subscriptionId: string,
     console.error('[ERROR] Failed to insert subscription details:', error);
     return { status: 'error' };
   }
+}
+
+async function pollSubscriptionStatus(userId: string, maxAttempts = 12) {
+  console.log(`[START] Polling subscription status for user: ${userId}`);
+  let attempts = 0;
+  while (attempts < maxAttempts) {
+    const status = await checkSubscriptionStatus(userId);
+    console.log(`[POLL] Attempt ${attempts + 1}: Status - ${status}`);
+    if (status === 'active') {
+      console.log('[SUCCESS] Subscription is now active');
+      return status;
+    }
+    attempts++;
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
+  }
+  console.log('[WARNING] Max polling attempts reached. Subscription may still be pending.');
+  return 'pending';
 }

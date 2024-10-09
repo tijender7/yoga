@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
-from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription
+from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription, update_subscription_status
 from app.db import supabase
 import logging
 import json
@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from razorpay.errors import SignatureVerificationError
 import os
 from datetime import datetime, timedelta
+from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL
 
 import razorpay
 from app.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
@@ -26,7 +27,7 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Add your frontend URL
+    allow_origins=["http://localhost:3000", "https://api.razorpay.com"],  # Add your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -156,18 +157,63 @@ async def test_endpoint():
 
 @app.post("/webhook/razorpay")
 async def razorpay_webhook(request: Request):
-    # Implement your webhook handling logic here
-    return {"status": "success"}
-
-async def update_subscription_status(subscription_id: str, status: str):
+    logger.info("[WEBHOOK] Received Razorpay webhook")
     try:
-        result = await supabase.table('subscriptions').update({
-            'status': status,
-            'updated_at': datetime.utcnow().isoformat()
-        }).eq('subscription_id', subscription_id).execute()
-        logger.info(f"Updated subscription status for {subscription_id} to {status}")
+        payload = await request.body()
+        signature = request.headers.get("X-Razorpay-Signature", "")
+        
+        logger.info(f"[WEBHOOK] Payload: {payload.decode()}")
+        logger.info(f"[WEBHOOK] Signature: {signature}")
+        logger.info(f"[WEBHOOK] Webhook Secret (first 5 chars): {RAZORPAY_WEBHOOK_SECRET[:5]}...")
+        
+        # Calculate expected signature
+        import hmac
+        import hashlib
+        expected_signature = hmac.new(RAZORPAY_WEBHOOK_SECRET.encode(), payload, hashlib.sha256).hexdigest()
+        logger.info(f"[WEBHOOK] Expected Signature: {expected_signature}")
+        logger.info(f"[WEBHOOK] Signature Match: {signature == expected_signature}")
+
+        client.utility.verify_webhook_signature(payload.decode(), signature, RAZORPAY_WEBHOOK_SECRET)
+        logger.info("[WEBHOOK] Signature verified successfully")
+
+        data = json.loads(payload)
+        logger.info(f"[WEBHOOK] Processed data: {json.dumps(data, indent=2)}")
+
+        if data['event'] == 'subscription.charged':
+            subscription_id = data['payload']['subscription']['entity']['id']
+            status = data['payload']['subscription']['entity']['status']
+            payment_id = data['payload']['payment']['entity']['id']
+            logger.info(f"[WEBHOOK] Updating subscription: ID={subscription_id}, Status={status}, Payment ID={payment_id}")
+            await update_subscription_status(subscription_id, status, payment_id)
+            logger.info(f"[WEBHOOK] Subscription status updated: {subscription_id} - {status}")
+
+        return {"status": "success"}
     except Exception as e:
-        logger.error(f"Failed to update subscription status: {str(e)}")
+        logger.error(f"[WEBHOOK] Error processing webhook: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
+    logger.info(f"[WEBHOOK] Updating subscription status: {subscription_id} to {status}")
+    try:
+        update_data = {
+            'status': status,
+            'updated_at': datetime.now().isoformat()
+        }
+        if payment_id:
+            update_data['last_payment_id'] = payment_id
+
+        result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
+        
+        if result.data:
+            logger.info(f"[WEBHOOK] Subscription status updated successfully: {subscription_id} - {status}")
+            logger.info(f"[WEBHOOK] Updated data: {result.data}")
+        else:
+            logger.error(f"[WEBHOOK] Error updating subscription status: {result.error}")
+        
+        return result.data
+    except Exception as e:
+        logger.error(f"[WEBHOOK] Failed to update subscription status: {str(e)}")
+        raise
 
 @app.post("/api/create-subscription")
 async def create_subscription_endpoint(subscription_data: dict):
@@ -239,20 +285,19 @@ async def create_subscription_endpoint(subscription_data: dict):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.post("/api/check-subscription-status")
-async def check_subscription_endpoint(subscription_data: dict):
-    logger.info(f"[START] Checking subscription status. Data: {subscription_data}")
+async def check_subscription_status_endpoint(user_data: dict):
+    logger.info(f"[START] Checking subscription status. Data: {user_data}")
     try:
-        user_id = subscription_data.get('userId')
+        user_id = user_data.get('userId')
         if not user_id:
-            logger.error("[ERROR] userId is required")
-            raise HTTPException(status_code=400, detail="userId is required")
+            logger.error("[ERROR] Missing userId in request")
+            raise HTTPException(status_code=400, detail="Missing userId")
         
-        logger.info(f"[INFO] Checking subscription status for user: {user_id}")
         status = await check_subscription_status(user_id)
         logger.info(f"[SUCCESS] Subscription status for user {user_id}: {status}")
         return {"status": "success", "subscription_status": status}
     except Exception as e:
-        logger.error(f"[ERROR] Error checking subscription status: {str(e)}")
+        logger.error(f"[ERROR] Error checking subscription status: {str(e)}", exc_info=True)
         return {"status": "error", "subscription_status": "unknown", "message": str(e)}
 
 @app.post("/api/insert-subscription")
