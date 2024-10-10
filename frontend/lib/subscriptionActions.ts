@@ -2,7 +2,7 @@ import { supabase } from './supabase'
 import { loadRazorpay } from './razorpayLoader'; 
 import { API_BASE_URL } from '../config';// Ye function hum agle step mein create karenge
 
-export async function handleSubscribeNow(userId: string, planType: string, region: string) {
+export async function handleSubscribeNow(userId: string, planType: string, region: string, onSubscriptionSuccess: () => void) {
   console.log(`[START] Subscribe button clicked for user: ${userId}, plan type: ${planType}, region: ${region}`);
 
   try {
@@ -32,10 +32,9 @@ export async function handleSubscribeNow(userId: string, planType: string, regio
         description: `${planType} Subscription`,
         handler: async function (response: any) {
           console.log('[SUCCESS] Payment initiated:', response);
-          alert('Payment initiated. We will update you once it is confirmed.');
           const status = await pollSubscriptionStatus(userId);
           if (status === 'active') {
-            alert('Your subscription is now active!');
+            onSubscriptionSuccess();
           } else {
             alert('Your subscription is still being processed. Please check again later.');
           }
