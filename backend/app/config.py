@@ -25,15 +25,12 @@ if not PAYPAL_CLIENT_ID or not PAYPAL_SECRET:
     raise ValueError("PayPal Client ID and Secret must be set in the environment variables")
 
 # Razorpay credentials
-
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
-RAZORPAY_CALLBACK_URL = 'https://your-callback-url.com'
 
-# backend/app/config.py
-
-
+# Update RAZORPAY_CALLBACK_URL
+RAZORPAY_CALLBACK_URL = f"{NGROK_URL}/webhook/razorpay"
 
 # Add this check
 if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET or not RAZORPAY_WEBHOOK_SECRET:

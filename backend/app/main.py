@@ -8,10 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from razorpay.errors import SignatureVerificationError
 import os
 from datetime import datetime, timedelta
-from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL
+from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
 
 import razorpay
-from app.config import RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
 
 # Initialize Razorpay client
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
@@ -274,8 +273,8 @@ async def create_subscription_endpoint(subscription_data: dict):
                 "status": "success", 
                 "subscription_id": subscription_id, 
                 "payment_link": payment_link,
-                "razorpay_key": os.getenv("RAZORPAY_KEY_ID"),  # Add this line
-                "razorpay_plan_id": razorpay_plan_id  # Add this line
+                "razorpay_key": RAZORPAY_KEY_ID,
+                "razorpay_plan_id": razorpay_plan_id
             }
         else:
             logger.error(f"[ERROR] Subscription created but status is {status}")
