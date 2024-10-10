@@ -156,14 +156,13 @@ async def test_endpoint():
 
 @app.post("/webhook/razorpay")
 async def razorpay_webhook(request: Request):
-    logger.info("[WEBHOOK] Received Razorpay webhook")
+    logger.info("[WEBHOOK] Razorpay webhook received")
     try:
         payload = await request.body()
         signature = request.headers.get("X-Razorpay-Signature", "")
         
-        logger.info(f"[WEBHOOK] Payload: {payload.decode()}")
-        logger.info(f"[WEBHOOK] Signature: {signature}")
-        logger.info(f"[WEBHOOK] Webhook Secret (first 5 chars): {RAZORPAY_WEBHOOK_SECRET[:5]}...")
+        logger.info(f"[WEBHOOK] Payload received: {payload.decode()}")
+        logger.info(f"[WEBHOOK] Signature received: {signature}")
         
         # Calculate expected signature
         import hmac
@@ -176,23 +175,26 @@ async def razorpay_webhook(request: Request):
         logger.info("[WEBHOOK] Signature verified successfully")
 
         data = json.loads(payload)
-        logger.info(f"[WEBHOOK] Processed data: {json.dumps(data, indent=2)}")
+        logger.info(f"[WEBHOOK] Processed webhook data: {json.dumps(data, indent=2)}")
 
         if data['event'] == 'subscription.charged':
             subscription_id = data['payload']['subscription']['entity']['id']
             status = data['payload']['subscription']['entity']['status']
             payment_id = data['payload']['payment']['entity']['id']
-            logger.info(f"[WEBHOOK] Updating subscription: ID={subscription_id}, Status={status}, Payment ID={payment_id}")
+            logger.info(f"[WEBHOOK] Subscription charged event. ID: {subscription_id}, Status: {status}, Payment ID: {payment_id}")
             await update_subscription_status(subscription_id, status, payment_id)
-            logger.info(f"[WEBHOOK] Subscription status updated: {subscription_id} - {status}")
+            logger.info(f"[WEBHOOK] Subscription status updated successfully")
 
         return {"status": "success"}
+    except SignatureVerificationError:
+        logger.error("[WEBHOOK] Signature verification failed")
+        raise HTTPException(status_code=400, detail="Invalid signature")
     except Exception as e:
         logger.error(f"[WEBHOOK] Error processing webhook: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
-    logger.info(f"[WEBHOOK] Updating subscription status: {subscription_id} to {status}")
+    logger.info(f"[WEBHOOK] Updating subscription status. ID: {subscription_id}, New Status: {status}")
     try:
         update_data = {
             'status': status,
@@ -200,18 +202,18 @@ async def update_subscription_status(subscription_id: str, status: str, payment_
         }
         if payment_id:
             update_data['last_payment_id'] = payment_id
+            logger.info(f"[WEBHOOK] Updating last payment ID: {payment_id}")
 
         result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
         
         if result.data:
-            logger.info(f"[WEBHOOK] Subscription status updated successfully: {subscription_id} - {status}")
-            logger.info(f"[WEBHOOK] Updated data: {result.data}")
+            logger.info(f"[WEBHOOK] Subscription status updated successfully. New data: {json.dumps(result.data, indent=2)}")
         else:
-            logger.error(f"[WEBHOOK] Error updating subscription status: {result.error}")
+            logger.error(f"[WEBHOOK] Error updating subscription status. Error: {result.error}")
         
         return result.data
     except Exception as e:
-        logger.error(f"[WEBHOOK] Failed to update subscription status: {str(e)}")
+        logger.error(f"[WEBHOOK] Failed to update subscription status. Error: {str(e)}")
         raise
 
 @app.post("/api/create-subscription")

@@ -172,7 +172,7 @@ async def insert_subscription(user_id: str, subscription_id: str, plan_id: str, 
         raise
 
 async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
-    logger.info(f"[WEBHOOK] Updating subscription status: {subscription_id} to {status}")
+    logger.info(f"[WEBHOOK] Updating subscription status. ID: {subscription_id}, New Status: {status}")
     try:
         update_data = {
             'status': status,
@@ -180,15 +180,16 @@ async def update_subscription_status(subscription_id: str, status: str, payment_
         }
         if payment_id:
             update_data['last_payment_id'] = payment_id
+            logger.info(f"[WEBHOOK] Updating last payment ID: {payment_id}")
 
         result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
         
         if result.data:
-            logger.info(f"[WEBHOOK] Subscription status updated successfully: {subscription_id} - {status}")
+            logger.info(f"[WEBHOOK] Subscription status updated successfully. New data: {json.dumps(result.data, indent=2)}")
         else:
-            logger.error(f"[WEBHOOK] Error updating subscription status: {result.error}")
+            logger.error(f"[WEBHOOK] Error updating subscription status. Error: {result.error}")
         
         return result.data
     except Exception as e:
-        logger.error(f"[WEBHOOK] Failed to update subscription status: {str(e)}")
+        logger.error(f"[WEBHOOK] Failed to update subscription status. Error: {str(e)}")
         raise

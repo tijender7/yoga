@@ -1,0 +1,67 @@
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{0}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m5846668[m HEAD@{1}: commit: webhook ko add kiye hai config and main file me
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{2}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{3}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{4}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{5}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{6}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{7}: reset: moving to 4b43db0882c23fb88c51f2a03f8abea8a4d2a9dd
+[33m4b43db0[m[33m ([m[1;36mHEAD -> [m[1;32mrestructure-project[m[33m)[m HEAD@{8}: commit: animation in the center working fine confetti for payment card
+[33m0f2311c[m HEAD@{9}: commit: in env mentioned its devlopment so it allows us to resubsribe otherwise we have to chnage it to prod
+[33md6f8dc3[m HEAD@{10}: commit: not a final commit but webhhok somwhere working fine now
+[33mb99a7e8[m HEAD@{11}: commit: subscription payment working and now supabase tables are redeigned
+[33me2bad24[m HEAD@{12}: commit: pricing section created seprately
+[33mbb4b5de[m HEAD@{13}: reset: moving to bb4b5de117c54ef6735710fbaef90dd869bd9984
+[33mbb4b5de[m HEAD@{14}: reset: moving to bb4b5de117c54ef6735710fbaef90dd869bd9984
+[33mbb4b5de[m HEAD@{15}: reset: moving to bb4b5de117c54ef6735710fbaef90dd869bd9984
+[33mbb4b5de[m HEAD@{16}: commit: abhi tak subscription id create hoti hai or sahi chal rha hai but abhio ek option mila hai subscription button ab usko test karna hai
+[33m5940876[m HEAD@{17}: commit: sticky header fix
+[33md92d5ef[m HEAD@{18}: commit: crousel image loading fix
+[33m8116518[m HEAD@{19}: commit: price cards are fixed and coming from db
+[33m486a4bf[m HEAD@{20}: commit: card selection
+[33m1a398ac[m HEAD@{21}: commit: tabs added in price section for india europe and us
+[33m7f04c65[m HEAD@{22}: commit: text align coilor changes header also fixed
+[33m2c0c53b[m HEAD@{23}: reset: moving to 2c0c53b73dd2abd446fd09012b7a31299d85eaa6
+[33m2c0c53b[m HEAD@{24}: reset: moving to 2c0c53b73dd2abd446fd09012b7a31299d85eaa6
+[33m2c0c53b[m HEAD@{25}: reset: moving to 2c0c53b73dd2abd446fd09012b7a31299d85eaa6
+[33m2c0c53b[m HEAD@{26}: commit: fixed console errors and validate user and customer id creation process which is working fine
+[33m081cf56[m HEAD@{27}: reset: moving to 081cf565045dcc8ac786248aed42335af5c5c1f1
+[33m081cf56[m HEAD@{28}: commit: user id inserted custoer id for razor pay created
+[33m11beb55[m HEAD@{29}: reset: moving to 11beb55897cdd04b8877a156969049b2cf413575
+[33m11beb55[m HEAD@{30}: commit: checking all things email confirmtion before login sing up login is compeltly setup
+[33m3bbaf95[m HEAD@{31}: commit: sign in and sign up fixed
+[33m26ed31e[m HEAD@{32}: commit: added flags for prices
+[33m01a378e[m HEAD@{33}: commit: when clicked on yoga harmony redirected to landing page
+[33mf04660f[m HEAD@{34}: commit: forntend improved
+[33m7b73ee0[m HEAD@{35}: commit: dashbaord page par my account se move karna fix kia hai
+[33m5e1bc24[m HEAD@{36}: commit: ui header start free trail issue ko fix kia hai ab fir se dono button se form trigger hota hai userko register karne k liye
+[33m47e4176[m HEAD@{37}: commit: login or alrady loggedin icon
+[33me6d37f4[m HEAD@{38}: commit: booking form done
+[33m4534ab9[m HEAD@{39}: commit: signup singin ka form landign page correct kia hai ab landing singin par hoti hai
+[33me4466ab[m HEAD@{40}: commit: side ki 2 confirmation me se ek remove kari hai or ek hi use hogi
+[33maf7f277[m HEAD@{41}: commit: paypal test cases add kiye hai but abhi fully configured nahi hai
+[33m496437c[m HEAD@{42}: commit: login password reset redirection header book free class action triggered from header
+[33m93bc6e2[m HEAD@{43}: commit: login page and auth page
+[33ma47e20f[m HEAD@{44}: commit: added supabase and header fixed
+[33mbb20498[m HEAD@{45}: commit: Update .gitignore and README.md
+[33m06b4e52[m HEAD@{46}: commit: Add backend folder
+[33m0af5b78[m HEAD@{47}: commit: Add new frontend files
+[33m241b987[m HEAD@{48}: commit: Remove old files from root directory
+[33maf6aac4[m HEAD@{49}: commit: Add docker-compose.yml
+[33m5724790[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{50}: checkout: moving from master to restructure-project
+[33m5724790[m[33m ([m[1;32mmaster[m[33m)[m HEAD@{51}: commit: name added kia hai form me
+[33m1a7d4f7[m HEAD@{52}: commit: changed to weekend
+[33m32f4c03[m HEAD@{53}: commit: confetti form submisson from frontend is okay but needs to integrate with supabase
+[33m428bbc8[m HEAD@{54}: commit: animations added ins coll
+[33m6883a24[m HEAD@{55}: commit: haed line invest in future
+[33maa879fc[m HEAD@{56}: commit: Yoga Classes Tailored for You and About Us updated
+[33m300ba1a[m HEAD@{57}: commit: fixed about us
+[33m586a860[m HEAD@{58}: commit: sticky header added
+[33mbd0bbc3[m HEAD@{59}: commit: testimonial fix kare hai
+[33mbc2cbc7[m HEAD@{60}: commit: made changes in the ui for good looking moved the form below
+[33m11626c1[m HEAD@{61}: commit: yoga tainer ki image sahi set kari hai
+[33m59aa746[m HEAD@{62}: commit: ek sutent in action ko remove kar dia hai
+[33m33240fe[m HEAD@{63}: commit: crousel added
+[33m9f5d620[m HEAD@{64}: commit: removed warnings
+[33m60b197c[m HEAD@{65}: commit: landing page with animation :)
+[33m5248acd[m HEAD@{66}: commit (initial): Initial commit from Create Next App
