@@ -102,19 +102,21 @@ async def create_subscription(customer_id: str, plan_id: str):
 
 async def check_subscription_status_from_db(user_id: str):
     try:
-        # Supabase se active subscription fetch karo
-        current_date = datetime.now().isoformat()
-        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).gte('end_date', current_date).order('end_date', desc=True).limit(1).execute()
+        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).eq('status', 'active').limit(1).execute()
+
+        logger.info(f"Active subscription for user {user_id}: {subscription_response.data}")
 
         if subscription_response.data:
-            subscription = subscription_response.data[0]
+            active_subscription = subscription_response.data[0]
+            logger.info(f"Active subscription found: {active_subscription}")
             return {
-                'status': subscription['status'],
-                'plan_id': subscription['plan_id'],
-                'end_date': subscription['end_date'],
-                'razorpay_subscription_id': subscription['razorpay_sub']
+                'status': 'active',
+                'plan_id': active_subscription['plan_id'],
+                'end_date': active_subscription['end_date'],
+                'razorpay_subscription_id': active_subscription['razorpay_subscription_id']
             }
         else:
+            logger.info("No active subscription found")
             return {'status': 'no_active_subscription'}
     except Exception as e:
         logger.error(f"Error checking subscription status from DB: {str(e)}")

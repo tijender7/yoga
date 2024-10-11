@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
-from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription, update_subscription_status
+from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription, update_subscription_status, check_subscription_status_from_db
 from app.db import supabase
 import logging
 import json
@@ -8,8 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from razorpay.errors import SignatureVerificationError
 import os
 from datetime import datetime, timedelta
-from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET
-
+from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL, RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, IS_DEVELOPMENT
 import razorpay
 import hmac
 import hashlib
@@ -171,6 +170,9 @@ async def razorpay_webhook(request: Request):
         if event.startswith('subscription.'):
             subscription_id = data['payload']['subscription']['entity']['id']
             new_status = data['payload']['subscription']['entity']['status']
+            logger.info(f"[WEBHOOK] Subscription event: {event}")
+            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
+            logger.info(f"[WEBHOOK] New status: {new_status}")
             
             # Commented out Supabase update
             # result = await supabase.table('subscriptions').update({'status': new_status, 'updated_at': datetime.now().isoformat()}).eq('razorpay_subscription_id', subscription_id).execute()
@@ -181,21 +183,39 @@ async def razorpay_webhook(request: Request):
         elif event in ['payment.authorized', 'payment.captured']:
             payment_id = data['payload']['payment']['entity']['id']
             subscription_id = data['payload']['payment']['entity'].get('subscription_id')
+            amount = data['payload']['payment']['entity']['amount']
+            currency = data['payload']['payment']['entity']['currency']
+            logger.info(f"[WEBHOOK] Payment event: {event}")
+            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
+            logger.info(f"[WEBHOOK] Amount: {amount/100} {currency}")
+            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
         
         elif event == 'invoice.paid':
             payment_id = data['payload']['payment']['entity']['id']
             subscription_id = data['payload']['invoice']['entity'].get('subscription_id')
+            amount = data['payload']['invoice']['entity']['amount_paid']
+            currency = data['payload']['invoice']['entity']['currency']
+            logger.info(f"[WEBHOOK] Invoice event: {event}")
+            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
+            logger.info(f"[WEBHOOK] Amount paid: {amount/100} {currency}")
+            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
         
         elif event == 'order.paid':
             payment_id = data['payload']['payment']['entity']['id']
             subscription_id = data['payload']['order']['entity'].get('receipt')  # Assuming receipt is used for subscription_id
+            amount = data['payload']['order']['entity']['amount']
+            currency = data['payload']['order']['entity']['currency']
+            logger.info(f"[WEBHOOK] Order event: {event}")
+            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
+            logger.info(f"[WEBHOOK] Amount: {amount/100} {currency}")
+            logger.info(f"[WEBHOOK] Subscription ID (from receipt): {subscription_id}")
 
         if subscription_id:
             # Commented out Supabase update
             # result = await supabase.table('subscriptions').update({'last_payment_id': payment_id, 'updated_at': datetime.now().isoformat()}).eq('razorpay_subscription_id', subscription_id).execute()
             logger.info(f"[WEBHOOK] Payment event {event} processed for subscription {subscription_id}")
         else:
-            logger.info(f"[WEBHOOK] Payment event {event} received, but no subscription_id found. Payment ID: {payment_id}")
+            logger.warning(f"[WEBHOOK] Payment event {event} received, but no subscription_id found. Payment ID: {payment_id}")
         
         return {"status": "success", "message": f"Event {event} processed"}
 
@@ -226,6 +246,7 @@ async def update_subscription_status(subscription_id: str, status: str, payment_
         logger.error(f"[WEBHOOK] Failed to update subscription status: {str(e)}")
         raise
 
+
 @app.post("/api/create-subscription")
 async def create_subscription_endpoint(subscription_data: dict):
     logger.info(f"[START] Received subscription request: {subscription_data}")
@@ -233,11 +254,21 @@ async def create_subscription_endpoint(subscription_data: dict):
     plan_type = subscription_data.get('planType')
     region = subscription_data.get('region')
     
+    print(f"IS_DEVELOPMENT: {IS_DEVELOPMENT}")  # Debug ke liye
+    
     if not user_id or not plan_type or not region:
         logger.error(f"[ERROR] Missing data. Received: {subscription_data}")
         raise HTTPException(status_code=400, detail="User ID, Plan Type, and Region are required")
 
     try:
+        existing_subscription = await check_subscription_status_from_db(user_id)
+        print(f"IS_DEVELOPMENT: {IS_DEVELOPMENT}")  # Debug ke liye
+        if existing_subscription['status'] == 'active' and not IS_DEVELOPMENT:
+            logger.warning(f"User {user_id} already has an active subscription. Rejecting new subscription request.")
+            return {"status": "error", "message": "User already has an active subscription"}
+        elif existing_subscription['status'] == 'active' and IS_DEVELOPMENT:
+            logger.warning(f"Creating new subscription for user {user_id} in development mode, despite having an active subscription")
+
         logger.info(f"[STEP 1] Fetching subscription_plan_id for plan_type: {plan_type} and region: {region}")
         yoga_pricing_response = supabase.table('yoga_pricing').select('subscription_plan_id').eq('plan_type', plan_type).eq('region', region).execute()
         logger.info(f"[STEP 1] Yoga pricing response: {yoga_pricing_response}")
@@ -296,20 +327,15 @@ async def create_subscription_endpoint(subscription_data: dict):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @app.post("/api/check-subscription-status")
-async def check_subscription_status_endpoint(user_data: dict):
-    logger.info(f"[START] Checking subscription status. Data: {user_data}")
-    try:
-        user_id = user_data.get('userId')
-        if not user_id:
-            logger.error("[ERROR] Missing userId in request")
-            raise HTTPException(status_code=400, detail="Missing userId")
-        
-        status = await check_subscription_status(user_id)
-        logger.info(f"[SUCCESS] Subscription status for user {user_id}: {status}")
-        return {"status": "success", "subscription_status": status}
-    except Exception as e:
-        logger.error(f"[ERROR] Error checking subscription status: {str(e)}", exc_info=True)
-        return {"status": "error", "subscription_status": "unknown", "message": str(e)}
+async def check_subscription_status(data: dict):
+    user_id = data.get('userId')
+    logger.info(f"[START] Checking subscription status. Data: {data}")
+    
+    result = await check_subscription_status_from_db(user_id)
+    
+    logger.info(f"[RESULT] Subscription status for user {user_id}: {result}")
+    
+    return {"status": result['status']}
 
 @app.post("/api/insert-subscription")
 async def insert_subscription_endpoint(subscription_data: dict):

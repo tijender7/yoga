@@ -1,15 +1,27 @@
 import os
 import logging
 from dotenv import load_dotenv
-
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Optionally, set levels for specific loggers
+logging.getLogger('app.main').setLevel(logging.DEBUG)
+logging.getLogger('app.services').setLevel(logging.INFO)
 
 # Load environment variables from .env
 load_dotenv()
 
 # PayPal Credentials
+
+# config.py mein ya main file ke top par
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'production').lower()
+IS_DEVELOPMENT = ENVIRONMENT == 'development'
+
+print(f"ENVIRONMENT: {ENVIRONMENT}")  # Debug ke liye
+print(f"IS_DEVELOPMENT: {IS_DEVELOPMENT}")  # Debug ke liye
 
 API_BASE_URL = 'http://localhost:8000'
 NGROK_URL = os.getenv("NGROK_URL")
@@ -35,6 +47,7 @@ if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET or not RAZORPAY_WEBHOOK_SECRET
     raise ValueError("Razorpay credentials (KEY_ID, KEY_SECRET, and WEBHOOK_SECRET) must be set in the environment variables")
 
 # Add this after loading environment variables
+logger = logging.getLogger(__name__)
 logger.info(f"[CONFIG] Loaded RAZORPAY_KEY_ID: {RAZORPAY_KEY_ID[:5]}...")
 logger.info(f"[CONFIG] Loaded RAZORPAY_KEY_SECRET: {RAZORPAY_KEY_SECRET[:5]}...")
 logger.info(f"[CONFIG] Loaded RAZORPAY_WEBHOOK_SECRET: {RAZORPAY_WEBHOOK_SECRET[:5]}...")
