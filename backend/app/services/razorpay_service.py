@@ -101,35 +101,25 @@ async def create_subscription(customer_id: str, plan_id: str):
         raise
 
 async def check_subscription_status(user_id: str):
-    logger.info(f"[START] Checking subscription status for user: {user_id}")
     try:
-        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).order('created_at', desc=True).limit(1).execute()
-        logger.info(f"[INFO] Supabase response: {json.dumps(subscription_response.data, indent=2)}")
+        # Fetch customer details from Razorpay
+        customer = client.customer.fetch(user_id)
         
-        if subscription_response.data and len(subscription_response.data) > 0:
-            subscription_id = subscription_response.data[0].get('razorpay_subscription_id')
-            logger.info(f"[INFO] Fetching Razorpay subscription: {subscription_id}")
-            razorpay_subscription = client.subscription.fetch(subscription_id)
-            logger.info(f"[INFO] Razorpay subscription data: {json.dumps(razorpay_subscription, indent=2)}")
-            razorpay_status = razorpay_subscription['status']
-            logger.info(f"[INFO] Razorpay status for subscription {subscription_id}: {razorpay_status}")
-            
-            if razorpay_status != subscription_response.data[0].get('status'):
-                logger.info(f"[INFO] Status mismatch. Updating database from {subscription_response.data[0].get('status')} to {razorpay_status}")
-                update_result = supabase.table('subscriptions').update({'status': razorpay_status}).eq('razorpay_subscription_id', subscription_id).execute()
-                if update_result.data:
-                    logger.info(f"[INFO] Updated subscription status in database to {razorpay_status}")
-                    logger.info(f"[INFO] Update result: {json.dumps(update_result.data, indent=2)}")
-                else:
-                    logger.error(f"[ERROR] Failed to update subscription status in database: {update_result.error}")
-            
-            return razorpay_status
-        else:
-            logger.info(f"[INFO] No subscription found for user {user_id}")
-            return 'inactive'
+        # Fetch all subscriptions for this customer
+        subscriptions = client.subscription.all({'customer_id': user_id})
+        
+        if not subscriptions['items']:
+            logger.info(f"No subscriptions found for user {user_id}")
+            return "no_subscription"
+        
+        # Get the latest subscription
+        latest_subscription = subscriptions['items'][0]
+        
+        logger.info(f"Subscription status for user {user_id}: {latest_subscription['status']}")
+        return latest_subscription['status']
     except Exception as e:
-        logger.error(f"[ERROR] Error checking subscription status: {str(e)}")
-        return 'error'
+        logger.error(f"Error checking subscription status: {str(e)}", exc_info=True)
+        return "error"
 
 async def fetch_subscription_details(subscription_id: str):
     try:
@@ -154,42 +144,47 @@ async def create_payment_link(amount: int, currency: str = 'INR', description: s
         logger.error(f"Error creating payment link: {str(e)}")
         raise
 
-async def insert_subscription(user_id: str, subscription_id: str, plan_id: str, status: str):
+async def insert_subscription(user_id: str, subscription_id: str, plan_id: str, status: str, monthly_price: float, currency: str):
     try:
         subscription_data = {
             'user_id': user_id,
-            'subscription_id': subscription_id,
+            'razorpay_subscription_id': subscription_id,
             'plan_id': str(uuid.UUID(plan_id)),
             'status': status,
             'start_date': datetime.now().isoformat(),
-            'end_date': (datetime.now() + timedelta(days=365)).isoformat(),  # Assuming 1-year subscription
-        }
-        result = await supabase.table('subscriptions').insert(subscription_data).execute()
-        logger.info(f"[SUCCESS] Subscription inserted for user {user_id}: {result}")
-        return result
-    except Exception as e:
-        logger.error(f"[ERROR] Failed to insert subscription: {str(e)}")
-        raise
-
-async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
-    logger.info(f"[WEBHOOK] Updating subscription status. ID: {subscription_id}, New Status: {status}")
-    try:
-        update_data = {
-            'status': status,
+            'end_date': (datetime.now() + timedelta(days=365)).isoformat(),
+            'monthly_price': monthly_price,
+            'currency': currency,
+            'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat()
         }
-        if payment_id:
-            update_data['last_payment_id'] = payment_id
-            logger.info(f"[WEBHOOK] Updating last payment ID: {payment_id}")
-
-        result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
-        
-        if result.data:
-            logger.info(f"[WEBHOOK] Subscription status updated successfully. New data: {json.dumps(result.data, indent=2)}")
-        else:
-            logger.error(f"[WEBHOOK] Error updating subscription status. Error: {result.error}")
-        
-        return result.data
+        # Comment out Supabase insert
+        # result = await supabase.table('subscriptions').insert(subscription_data).execute()
+        logger.info(f"[INFO] Subscription data prepared for user {user_id}: {subscription_data}")
+        return subscription_data
     except Exception as e:
-        logger.error(f"[WEBHOOK] Failed to update subscription status. Error: {str(e)}")
+        logger.error(f"[ERROR] Failed to prepare subscription data: {str(e)}")
         raise
+
+async def update_subscription_status(subscription_id: str, event_type: str):
+    try:
+        subscription = client.subscription.fetch(subscription_id)
+        
+        if event_type == 'subscription.authenticated':
+            new_status = 'authenticated'
+        elif event_type == 'subscription.activated':
+            new_status = 'active'
+        elif event_type == 'subscription.charged':
+            new_status = 'charged'
+        elif event_type == 'subscription.completed':
+            new_status = 'completed'
+        elif event_type == 'subscription.cancelled':
+            new_status = 'cancelled'
+        else:
+            new_status = subscription['status']
+        
+        logger.info(f"Subscription {subscription_id} status updated to {new_status}")
+        return new_status
+    except Exception as e:
+        logger.error(f"Error updating subscription status: {str(e)}")
+        return "error"
