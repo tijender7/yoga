@@ -100,25 +100,32 @@ async def create_subscription(customer_id: str, plan_id: str):
         logger.error(f"Error creating subscription: {str(e)}")
         raise
 
+async def check_subscription_status_from_db(user_id: str):
+    try:
+        # Supabase se active subscription fetch karo
+        current_date = datetime.now().isoformat()
+        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).gte('end_date', current_date).order('end_date', desc=True).limit(1).execute()
+
+        if subscription_response.data:
+            subscription = subscription_response.data[0]
+            return {
+                'status': subscription['status'],
+                'plan_id': subscription['plan_id'],
+                'end_date': subscription['end_date'],
+                'razorpay_subscription_id': subscription['razorpay_sub']
+            }
+        else:
+            return {'status': 'no_active_subscription'}
+    except Exception as e:
+        logger.error(f"Error checking subscription status from DB: {str(e)}")
+        return {'status': 'error', 'message': str(e)}
+
 async def check_subscription_status(user_id: str):
     try:
-        # Fetch customer details from Razorpay
-        customer = client.customer.fetch(user_id)
-        
-        # Fetch all subscriptions for this customer
-        subscriptions = client.subscription.all({'customer_id': user_id})
-        
-        if not subscriptions['items']:
-            logger.info(f"No subscriptions found for user {user_id}")
-            return "no_subscription"
-        
-        # Get the latest subscription
-        latest_subscription = subscriptions['items'][0]
-        
-        logger.info(f"Subscription status for user {user_id}: {latest_subscription['status']}")
-        return latest_subscription['status']
+        subscription_status = await check_subscription_status_from_db(user_id)
+        return subscription_status['status']
     except Exception as e:
-        logger.error(f"Error checking subscription status: {str(e)}", exc_info=True)
+        logger.error(f"Error checking subscription status: {str(e)}")
         return "error"
 
 async def fetch_subscription_details(subscription_id: str):
