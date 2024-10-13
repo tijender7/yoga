@@ -310,6 +310,19 @@ async def create_subscription_endpoint(subscription_data: dict):
         subscription_id, status, payment_link = await create_subscription(razorpay_customer_id, razorpay_plan_id)
         logger.info(f"[STEP 4] Subscription created: {subscription_id}, Status: {status}, Payment link: {payment_link}")
 
+        # New code to insert subscription data into Supabase
+        if status == 'created':
+            subscription_insert_data = {
+                'user_id': user_id,
+                'razorpay_plan_id': razorpay_plan_id,  # Yahan change karein agar column ka naam alag hai
+                'razorpay_subscription_id': subscription_id,
+                'status': status,
+                'start_date': datetime.now().isoformat(),
+                'end_date': (datetime.now() + timedelta(days=365)).isoformat(),  # Assuming 1-year subscription
+            }
+            insert_result = supabase.table('subscriptions').insert(subscription_insert_data).execute()
+            logger.info(f"[STEP 5] Subscription inserted into database: {insert_result}")
+
         if status == 'created' and payment_link:
             logger.info("[SUCCESS] Subscription process completed successfully")
             return {
