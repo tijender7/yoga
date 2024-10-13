@@ -162,7 +162,7 @@ async def razorpay_webhook(request: Request):
         data = json.loads(payload)
         event = data['event']
         logger.info(f"[WEBHOOK] Received Razorpay webhook: {event}")
-        logger.debug(f"[WEBHOOK] Full payload: {json.dumps(data, indent=2)}")
+        # logger.debug(f"[WEBHOOK] Full payload: {json.dumps(data, indent=2)}")  # Yeh line comment out kar di hai
 
         subscription_id = None
         payment_id = None
