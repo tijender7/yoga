@@ -102,22 +102,25 @@ async def create_subscription(customer_id: str, plan_id: str):
 
 async def check_subscription_status_from_db(user_id: str):
     try:
-        subscription_response = supabase.table('subscriptions').select('*').eq('user_id', user_id).eq('status', 'active').limit(1).execute()
+        response = supabase.table('subscriptions').select('*').eq('user_id', user_id).eq('status', 'active').limit(1).execute()
+        subscriptions = response.data
 
-        logger.info(f"Active subscription for user {user_id}: {subscription_response.data}")
-
-        if subscription_response.data:
-            active_subscription = subscription_response.data[0]
-            logger.info(f"Active subscription found: {active_subscription}")
+        if subscriptions:
+            subscription = subscriptions[0]
+            logger.info(f"Active subscription for user {user_id}: {subscriptions}")
+            logger.info(f"Active subscription found: {subscription}")
+            
             return {
                 'status': 'active',
-                'plan_id': active_subscription['plan_id'],
-                'end_date': active_subscription['end_date'],
-                'razorpay_subscription_id': active_subscription['razorpay_subscription_id']
+                'plan_id': subscription['razorpay_plan_id'],  # Changed from 'plan_id' to 'razorpay_plan_id'
+                'subscription_id': subscription['razorpay_subscription_id'],
+                'start_date': subscription['start_date'],
+                'end_date': subscription['end_date'],
+                'next_billing_date': subscription['next_payment_date']
             }
         else:
-            logger.info("No active subscription found")
-            return {'status': 'no_active_subscription'}
+            logger.info(f"No active subscription found for user {user_id}")
+            return {'status': 'inactive'}
     except Exception as e:
         logger.error(f"Error checking subscription status from DB: {str(e)}")
         return {'status': 'error', 'message': str(e)}

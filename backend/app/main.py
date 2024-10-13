@@ -162,61 +162,41 @@ async def razorpay_webhook(request: Request):
         data = json.loads(payload)
         event = data['event']
         logger.info(f"[WEBHOOK] Received Razorpay webhook: {event}")
-        # logger.debug(f"[WEBHOOK] Full payload: {json.dumps(data, indent=2)}")  # Yeh line comment out kar di hai
 
-        subscription_id = None
-        payment_id = None
+        subscription = data['payload'].get('subscription', {}).get('entity', {})
+        payment = data['payload'].get('payment', {}).get('entity', {})
 
-        if event.startswith('subscription.'):
-            subscription_id = data['payload']['subscription']['entity']['id']
-            new_status = data['payload']['subscription']['entity']['status']
-            logger.info(f"[WEBHOOK] Subscription event: {event}")
-            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
-            logger.info(f"[WEBHOOK] New status: {new_status}")
+        subscription_id = subscription.get('id')
+        status = subscription.get('status')
+        payment_id = payment.get('id')
+        amount_paid = payment.get('amount', 0) / 100  # Convert to rupees
+
+        update_data = {
+            'status': status,
+            'total_count': subscription.get('total_count'),
+            'paid_count': subscription.get('paid_count'),
+            'remaining_count': subscription.get('remaining_count'),
+            'next_payment_date': datetime.fromtimestamp(subscription.get('charge_at', 0)).isoformat() if subscription.get('charge_at') else None,
+            'updated_at': datetime.now().isoformat(),
+            'order_id': payment.get('order_id'),
+            'invoice_id': payment.get('invoice_id'),
+            'current_start': datetime.fromtimestamp(subscription.get('current_start', 0)).isoformat() if subscription.get('current_start') else None,
+            'current_end': datetime.fromtimestamp(subscription.get('current_end', 0)).isoformat() if subscription.get('current_end') else None,
+            'payment_method': subscription.get('payment_method') or payment.get('method'),
+        }
+
+        if payment_id:
+            update_data['last_payment_id'] = payment_id
+            update_data['last_payment_date'] = datetime.now().isoformat()
+
+        if event in ['subscription.authenticated', 'subscription.activated', 'subscription.charged', 'invoice.paid', 'order.paid']:
+            # Update subscription in database
+            update_result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
             
-            # Commented out Supabase update
-            # result = await supabase.table('subscriptions').update({'status': new_status, 'updated_at': datetime.now().isoformat()}).eq('razorpay_subscription_id', subscription_id).execute()
-            
-            logger.info(f"[WEBHOOK] Subscription {subscription_id} status updated to {new_status}")
-            return {"status": "success", "subscription_status": new_status}
-        
-        elif event in ['payment.authorized', 'payment.captured']:
-            payment_id = data['payload']['payment']['entity']['id']
-            subscription_id = data['payload']['payment']['entity'].get('subscription_id')
-            amount = data['payload']['payment']['entity']['amount']
-            currency = data['payload']['payment']['entity']['currency']
-            logger.info(f"[WEBHOOK] Payment event: {event}")
-            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
-            logger.info(f"[WEBHOOK] Amount: {amount/100} {currency}")
-            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
-        
-        elif event == 'invoice.paid':
-            payment_id = data['payload']['payment']['entity']['id']
-            subscription_id = data['payload']['invoice']['entity'].get('subscription_id')
-            amount = data['payload']['invoice']['entity']['amount_paid']
-            currency = data['payload']['invoice']['entity']['currency']
-            logger.info(f"[WEBHOOK] Invoice event: {event}")
-            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
-            logger.info(f"[WEBHOOK] Amount paid: {amount/100} {currency}")
-            logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
-        
-        elif event == 'order.paid':
-            payment_id = data['payload']['payment']['entity']['id']
-            subscription_id = data['payload']['order']['entity'].get('receipt')  # Assuming receipt is used for subscription_id
-            amount = data['payload']['order']['entity']['amount']
-            currency = data['payload']['order']['entity']['currency']
-            logger.info(f"[WEBHOOK] Order event: {event}")
-            logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
-            logger.info(f"[WEBHOOK] Amount: {amount/100} {currency}")
-            logger.info(f"[WEBHOOK] Subscription ID (from receipt): {subscription_id}")
+            logger.info(f"[WEBHOOK] Subscription {subscription_id} updated:")
+            logger.info(f"Status: {status}, Payment ID: {payment_id}, Amount: {amount_paid}")
+            logger.info(f"Next payment date: {update_data['next_payment_date']}")
 
-        if subscription_id:
-            # Commented out Supabase update
-            # result = await supabase.table('subscriptions').update({'last_payment_id': payment_id, 'updated_at': datetime.now().isoformat()}).eq('razorpay_subscription_id', subscription_id).execute()
-            logger.info(f"[WEBHOOK] Payment event {event} processed for subscription {subscription_id}")
-        else:
-            logger.warning(f"[WEBHOOK] Payment event {event} received, but no subscription_id found. Payment ID: {payment_id}")
-        
         return {"status": "success", "message": f"Event {event} processed"}
 
     except Exception as e:
@@ -314,11 +294,13 @@ async def create_subscription_endpoint(subscription_data: dict):
         if status == 'created':
             subscription_insert_data = {
                 'user_id': user_id,
-                'razorpay_plan_id': razorpay_plan_id,  # Yahan change karein agar column ka naam alag hai
+                'razorpay_plan_id': razorpay_plan_id,
                 'razorpay_subscription_id': subscription_id,
                 'status': status,
                 'start_date': datetime.now().isoformat(),
-                'end_date': (datetime.now() + timedelta(days=365)).isoformat(),  # Assuming 1-year subscription
+                'end_date': (datetime.now() + timedelta(days=365)).isoformat(),
+                'created_at': datetime.now().isoformat(),
+                'updated_at': datetime.now().isoformat()
             }
             insert_result = supabase.table('subscriptions').insert(subscription_insert_data).execute()
             logger.info(f"[STEP 5] Subscription inserted into database: {insert_result}")
