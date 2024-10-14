@@ -170,3 +170,36 @@ async function pollSubscriptionStatus(userId: string, maxAttempts = 12) {
   console.log('[WARNING] Max polling attempts reached. Subscription may still be pending.');
   return 'pending';
 }
+
+export async function handlePayPalSubscription(userId: string, planType: string, region: string, onSuccess: () => void) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/create-paypal-subscription`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customerId: userId, planType, region }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create PayPal subscription');
+    }
+
+    const data = await response.json();
+    console.log('PayPal subscription created:', data);
+    
+    // TODO: Implement PayPal checkout flow here
+    alert('PayPal subscription flow will be implemented here');
+
+    onSuccess();
+  } catch (error) {
+    console.error('Error creating PayPal subscription:', error);
+    throw error;
+  }
+}
+
+export async function handleRazorpaySubscription(userId: string, planType: string, region: string, onSuccess: () => void) {
+  // This function should contain the logic for handling Razorpay subscriptions
+  // For now, we'll just call the existing handleSubscribeNow function
+  await handleSubscribeNow(userId, planType, region, onSuccess);
+}

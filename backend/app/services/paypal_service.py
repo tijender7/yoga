@@ -1,10 +1,10 @@
 import requests
 from app.utils.paypal import get_paypal_access_token
-from app.config import PAYPAL_BASE_URL
+from app.config import PAYPAL_API_BASE, PAYPAL_CLIENT_ID, PAYPAL_SECRET
 
 def create_paypal_subscription(plan_id, user_details):
     access_token = get_paypal_access_token()  # Get access token using the Base64-encoded auth header
-    url = f"{PAYPAL_BASE_URL}/v1/billing/subscriptions"
+    url = f"{PAYPAL_API_BASE}/v1/billing/subscriptions"
     
     headers = {
         "Authorization": f"Bearer {access_token}",

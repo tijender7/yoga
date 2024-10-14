@@ -12,6 +12,8 @@ from app.config import API_BASE_URL, RAZORPAY_CALLBACK_URL, RAZORPAY_KEY_ID, RAZ
 import razorpay
 import hmac
 import hashlib
+from app.services.paypal_service import create_paypal_subscription
+from fastapi.responses import JSONResponse
 
 # Initialize Razorpay client
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
@@ -378,3 +380,24 @@ async def insert_subscription_endpoint(subscription_data: dict):
     except Exception as e:
         logger.error(f"[ERROR] Failed to insert subscription: {str(e)}")
         return {"status": "error", "message": str(e)}
+
+@app.post("/api/create-paypal-subscription")
+async def create_paypal_subscription_endpoint(request: Request):
+    try:
+        data = await request.json()
+        customer_id = data['customerId']
+        plan_type = data['planType']
+        region = data['region']
+
+        # TODO: Implement PayPal subscription creation logic
+        # For now, we'll just return a dummy response
+        subscription_data = {
+            "id": "dummy_paypal_subscription_id",
+            "status": "APPROVAL_PENDING",
+            "plan_id": "dummy_plan_id",
+        }
+
+        return JSONResponse(content=subscription_data, status_code=200)
+    except Exception as e:
+        logger.error(f"Error creating PayPal subscription: {str(e)}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)

@@ -15,7 +15,9 @@ logging.getLogger('app.services').setLevel(logging.INFO)
 load_dotenv()
 
 # PayPal Credentials
-
+PAYPAL_API_BASE = os.getenv("PAYPAL_API_BASE", "https://api-m.sandbox.paypal.com")
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_SECRET  = os.getenv("PAYPAL_CLIENT_SECRET")
 # config.py mein ya main file ke top par
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'production').lower()
 IS_DEVELOPMENT = ENVIRONMENT == 'development'

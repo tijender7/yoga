@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Check } from 'lucide-react';
-import { fetchYogaPricing, handleSubscribeNow, checkSubscriptionStatus } from '@/lib/subscriptionActions';
+import { fetchYogaPricing, handleSubscribeNow, checkSubscriptionStatus, handleRazorpaySubscription, handlePayPalSubscription } from '@/lib/subscriptionActions';
+
 import { supabase } from '@/lib/supabase';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
 import { Loader2 } from 'lucide-react';
@@ -77,7 +78,11 @@ const PricingSection: React.FC = () => {
         alert('Test Environment: Proceeding with subscription process despite active status.');
       }
 
-      await handleSubscribeNow(user.id, planType, region, () => setShowSuccessCard(true));
+      if (region === 'India') {
+        await handleRazorpaySubscription(user.id, planType, region, () => setShowSuccessCard(true));
+      } else {
+        await handlePayPalSubscription(user.id, planType, region, () => setShowSuccessCard(true));
+      }
     } catch (error) {
       console.error('Subscription failed:', error);
       alert('An error occurred while processing your subscription. Please try again.');
