@@ -162,15 +162,15 @@ async def razorpay_webhook(request: Request):
         data = json.loads(payload)
         event = data['event']
         logger.info(f"[WEBHOOK] Received Razorpay webhook: {event}")
-
+        logger.debug(f"[WEBHOOK] Full payload: {json.dumps(data, indent=2)}")
         subscription = data['payload'].get('subscription', {}).get('entity', {})
         payment = data['payload'].get('payment', {}).get('entity', {})
-
+        payment_id = None
         subscription_id = subscription.get('id')
         status = subscription.get('status')
         payment_id = payment.get('id')
         amount_paid = payment.get('amount', 0) / 100  # Convert to rupees
-
+        logger.info(f"[WEBHOOK] Subscription event: {event}")
         update_data = {
             'status': status,
             'total_count': subscription.get('total_count'),
@@ -184,10 +184,15 @@ async def razorpay_webhook(request: Request):
             'current_end': datetime.fromtimestamp(subscription.get('current_end', 0)).isoformat() if subscription.get('current_end') else None,
             'payment_method': subscription.get('payment_method') or payment.get('method'),
         }
-
-        if payment_id:
-            update_data['last_payment_id'] = payment_id
-            update_data['last_payment_date'] = datetime.now().isoformat()
+        
+        # Check if payment information is available
+        if payment:
+            currency = payment.get('currency')
+            if payment_id:
+                update_data['last_payment_id'] = payment_id
+                update_data['last_payment_date'] = datetime.now().isoformat()
+        else:
+            currency = None
 
         if event in ['subscription.authenticated', 'subscription.activated', 'subscription.charged', 'invoice.paid', 'order.paid']:
             # Update subscription in database
@@ -196,9 +201,11 @@ async def razorpay_webhook(request: Request):
             logger.info(f"[WEBHOOK] Subscription {subscription_id} updated:")
             logger.info(f"Status: {status}, Payment ID: {payment_id}, Amount: {amount_paid}")
             logger.info(f"Next payment date: {update_data['next_payment_date']}")
-
+            if payment_id:
+                logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
+        
+        logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
         return {"status": "success", "message": f"Event {event} processed"}
-
     except Exception as e:
         logger.error(f"[WEBHOOK] Error processing webhook: {str(e)}", exc_info=True)
         return {"status": "error", "message": str(e)}
