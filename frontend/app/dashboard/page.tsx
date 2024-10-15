@@ -12,50 +12,70 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'  // Import User type
 
-// Mock data for demonstration purposes
-const mockUserData = {
-  name: "Sarah Davis",
-  email: "sarah.davis@example.com",
-  subscriptionPlan: "1-Year Premium",
-  subscriptionExpiry: "December 31, 2023",
-  avatar: "/placeholder.svg?height=100&width=100",
-}
-
-const mockPayments = [
-  { id: "PAY-001", orderId: "ORD-001", date: "May 1, 2023", plan: "1-Year Premium", amount: "$199.99" },
-  { id: "PAY-002", orderId: "ORD-002", date: "Apr 1, 2022", plan: "6-Month Premium", amount: "$119.99" },
-  { id: "PAY-003", orderId: "ORD-003", date: "Oct 1, 2021", plan: "3-Month Premium", amount: "$69.99" },
-]
+// Add this type definition at the top of your file
+type Subscription = {
+  id: string;
+  status: string;
+  razorpay_plan_id: string;
+  start_date: string;
+  end_date: string;
+  next_payment_date: string;
+  last_payment_id: string;
+  order_id: string;
+  invoice_id: string;
+  payment_method: string;
+  last_payment_date: string;
+};
 
 async function fetchSubscriptionData(userId: string) {
-  const { data: subscriptionData, error: subscriptionError } = await supabase
+  const { data, error } = await supabase
     .from('subscriptions')
-    .select('*')
+    .select(`
+      id,
+      status,
+      razorpay_plan_id,
+      start_date,
+      end_date,
+      next_payment_date,
+      last_payment_id,
+      order_id,
+      invoice_id,
+      payment_method,
+      last_payment_date
+    `)
     .eq('user_id', userId)
+    .neq('status', 'created')
+    .not('invoice_id', 'is', null)
     .order('created_at', { ascending: false })
-    .limit(1)
 
-  const { data: paymentsData, error: paymentsError } = await supabase
-    .from('payments')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  if (subscriptionError || paymentsError) {
-    console.error('Error fetching data:', subscriptionError || paymentsError)
+  if (error) {
+    console.error('Error fetching subscription data:', error)
     return null
   }
 
-  return {
-    subscription: subscriptionData[0],
-    payments: paymentsData
+  return data
+}
+
+async function fetchPlanDetails(razorpayPlanId: string) {
+  const { data, error } = await supabase
+    .from('subscription_plans')
+    .select('name, price, currency')
+    .eq('razorpay_plan_id', razorpayPlanId)
+    .single()
+
+  if (error) {
+    console.error('Error fetching plan details:', error)
+    return null
   }
+
+  return data
 }
 
 export default function Dashboard() {
   const [showCancelDialog, setShowCancelDialog] = useState(false)
-  const [user, setUser] = useState<User | null>(null)  // Update the type here
+  const [user, setUser] = useState<User | null>(null)
+  const [subscriptionData, setSubscriptionData] = useState<Subscription[] | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -63,12 +83,23 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
+        const subData = await fetchSubscriptionData(user.id)
+        setSubscriptionData(subData)
       } else {
         router.push('/auth')
       }
+      setIsLoading(false)
     }
     checkUser()
   }, [router])
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!user) {
+    return <div>Please log in to view your dashboard.</div>
+  }
 
   const handleCancelSubscription = () => {
     // In a real app, you'd implement the cancellation logic here
@@ -79,10 +110,6 @@ export default function Dashboard() {
   const handleUpgradeSubscription = () => {
     // In a real app, you'd implement the upgrade logic here
     console.log("Navigating to upgrade options")
-  }
-
-  if (!user) {
-    return <div>Loading...</div>
   }
 
   return (
@@ -96,12 +123,12 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent className="flex items-center space-x-4">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={mockUserData.avatar} alt={mockUserData.name} />
-                <AvatarFallback>{mockUserData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                <AvatarImage src={user.user_metadata?.avatar_url || "/placeholder.svg"} alt={user.user_metadata?.full_name || "User"} />
+                <AvatarFallback>{user.user_metadata?.full_name?.split(' ').map((n: string) => n[0]).join('') || "U"}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="text-xl font-semibold">{mockUserData.name}</h3>
-                <p className="text-sm text-muted-foreground">{mockUserData.email}</p>
+                <h3 className="text-xl font-semibold">{user.user_metadata?.full_name || "User"}</h3>
+                <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
             </CardContent>
           </Card>
@@ -110,60 +137,82 @@ export default function Dashboard() {
               <CardTitle>Subscription Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <p><strong>Plan:</strong> {mockUserData.subscriptionPlan}</p>
-              <p><strong>Expires:</strong> {mockUserData.subscriptionExpiry}</p>
+              {subscriptionData && subscriptionData.length > 0 ? (
+                <>
+                  <p><strong>Status:</strong> {subscriptionData[0].status}</p>
+                  <p><strong>Start Date:</strong> {new Date(subscriptionData[0].start_date).toLocaleDateString()}</p>
+                  <p><strong>End Date:</strong> {new Date(subscriptionData[0].end_date).toLocaleDateString()}</p>
+                  <p><strong>Next Payment Date:</strong> {new Date(subscriptionData[0].next_payment_date).toLocaleDateString()}</p>
+                  <p><strong>Payment Method:</strong> {subscriptionData[0].payment_method}</p>
+                </>
+              ) : (
+                <p>No active subscription found. Would you like to subscribe to a plan?</p>
+              )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-                <DialogTrigger asChild>
-                  <Button variant="outline">Cancel Subscription</Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Cancel Subscription</DialogTitle>
-                    <DialogDescription>
-                      Are you sure you want to cancel your subscription? You'll lose access to premium features.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Button onClick={handleCancelSubscription}>Confirm Cancellation</Button>
-                </DialogContent>
-              </Dialog>
-              <Button onClick={handleUpgradeSubscription}>Upgrade Subscription</Button>
+              {subscriptionData ? (
+                <>
+                  <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline">Cancel Subscription</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Cancel Subscription</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to cancel your subscription? You'll lose access to premium features.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Button onClick={handleCancelSubscription}>Confirm Cancellation</Button>
+                    </DialogContent>
+                  </Dialog>
+                  <Button onClick={handleUpgradeSubscription}>Upgrade Subscription</Button>
+                </>
+              ) : (
+                <Button onClick={() => router.push('/pricing')}>View Subscription Plans</Button>
+              )}
             </CardFooter>
           </Card>
         </div>
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Payment History</CardTitle>
-            <CardDescription>Your recent payments and subscriptions</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Payment ID</TableHead>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockPayments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell>{payment.id}</TableCell>
-                    <TableCell>{payment.orderId}</TableCell>
-                    <TableCell>{payment.date}</TableCell>
-                    <TableCell>{payment.plan}</TableCell>
-                    <TableCell>{payment.amount}</TableCell>
+            {subscriptionData && subscriptionData.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Last Payment Date</TableHead>
+                    <TableHead>Invoice ID</TableHead>
+                    <TableHead>Payment Method</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {subscriptionData.map((subscription: Subscription, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{subscription.status}</TableCell>
+                      <TableCell>
+                        {subscription.last_payment_date ? (
+                          <>
+                            <div>{new Date(subscription.last_payment_date).toLocaleDateString()}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(subscription.last_payment_date).toLocaleTimeString()}
+                            </div>
+                          </>
+                        ) : 'N/A'}
+                      </TableCell>
+                      <TableCell>{subscription.invoice_id}</TableCell>
+                      <TableCell>{subscription.payment_method || 'N/A'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p>No payment history available.</p>
+            )}
           </CardContent>
-          <CardFooter>
-            <p className="text-sm text-muted-foreground">Total payments in the past month: {mockPayments.length}</p>
-          </CardFooter>
         </Card>
         <Card className="mt-6">
           <CardHeader>
