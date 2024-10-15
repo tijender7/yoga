@@ -30,7 +30,8 @@ const mockUserData = {
   totalSessions: 48,
   sessionsThisMonth: 12,
   streak: 7,
-  level: 3
+  level: 5
+  
 }
 
 const mockSessions = [
