@@ -28,7 +28,7 @@ const SmartPaymentButton: React.FC<SmartPaymentButtonProps> = ({
       const options = {
         key: razorpayKey,
         subscription_id: razorpaySubscriptionId,
-        name: "YogaHarmony",
+        name: "YogForever",
         description: "Subscription Payment",
         handler: function (response: any) {
           console.log('Payment successful', response);

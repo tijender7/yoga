@@ -77,9 +77,9 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
    docker-compose up --build
    ```
 
-# YogaHarmony
+# YogForever
 
-YogaHarmony is a web application for yoga enthusiasts to book classes and manage their yoga journey.
+YogForever is a web application for yoga enthusiasts to book classes and manage their yoga journey.
 
 ## Important Notes for Developers
 

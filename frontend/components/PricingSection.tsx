@@ -1,245 +1,136 @@
-// components/PricingSection.tsx
-
-"use client";
-
-import { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Check } from 'lucide-react';
-import { fetchYogaPricing, handleSubscribeNow, checkSubscriptionStatus, handleRazorpaySubscription, handlePayPalSubscription } from '@/lib/subscriptionActions';
-
-import { supabase } from '@/lib/supabase';
-import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
-import { Loader2 } from 'lucide-react';
-import SubscriptionSuccessCard from '@/components/SubscriptionSuccessCard';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Check } from "lucide-react"
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 
 interface PricingPlan {
-  id: number;
-  region: string;
-  plan_type: string;
-  monthly_price: number;
-  total_price: number;
-  savings: number;
-  currency: string;
-  strike_price: number;
-  discounted_monthly_price: number;
-  discount_percentage: number;
+  id: number
+  region: string
+  currency: string
+  discounted_price: string
+  discount_percentage: number
+  strike_through_price: string
+  savings: string
 }
 
-const PricingSection: React.FC = () => {
-  const [selectedRegion, setSelectedRegion] = useState('India');
-  const [selectedPlan, setSelectedPlan] = useState('Annual');
-  const [pricingData, setPricingData] = useState<PricingPlan[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [showSuccessCard, setShowSuccessCard] = useState(false);
+const pricingPlans = [
+  {
+    region: "India",
+    price: 3500,
+    originalPrice: 5833,
+    currency: "₹",
+  },
+  {
+    region: "US",
+    price: 40,
+    originalPrice: 67,
+    currency: "$",
+  },
+  {
+    region: "Europe",
+    price: 40,
+    originalPrice: 67,
+    currency: "€",
+  },
+]
+
+export default function PricingSection() {
+  const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([])
 
   useEffect(() => {
-    async function loadPricingData() {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchYogaPricing(selectedRegion);
-        setPricingData(data);
-      } catch (err) {
-        console.error('Failed to fetch pricing data:', err);
-        setError('Failed to load pricing plans. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadPricingData();
-  }, [selectedRegion]);
+    async function fetchPricingPlans() {
+      const { data, error } = await supabase
+        .from('monthly_pricing_fixed')
+        .select('*')
 
-  const handleSubscribeClick = async (planType: string, region: string) => {
-    setLoadingPlan(planType);
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.log('User not logged in');
-      setLoadingPlan(null);
-      // TODO: Implement redirection to login or show login modal
-      return;
-    }
-
-    try {
-      const status = await checkSubscriptionStatus(user.id);
-      const isTestEnvironment = process.env.NEXT_PUBLIC_ENV === 'development';
-
-      if (status === 'active' && !isTestEnvironment) {
-        alert('You already have an active subscription.');
-        setLoadingPlan(null);
-        return;
-      }
-
-      if (isTestEnvironment && status === 'active') {
-        alert('Test Environment: Proceeding with subscription process despite active status.');
-      }
-
-      if (region === 'India') {
-        await handleRazorpaySubscription(user.id, planType, region, () => setShowSuccessCard(true));
+      if (error) {
+        console.error('Error fetching pricing plans:', error)
       } else {
-        await handlePayPalSubscription(user.id, planType, region, () => setShowSuccessCard(true));
+        setPricingPlans(data)
       }
-    } catch (error) {
-      console.error('Subscription failed:', error);
-      alert('An error occurred while processing your subscription. Please try again.');
-    } finally {
-      setLoadingPlan(null);
     }
-  };
+
+    fetchPricingPlans()
+  }, [])
 
   return (
-    <>
-      <ScrollAnimation>
-        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
-          <div className="container mx-auto px-4 md:px-6 max-w-6xl">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Simple and Affordable Plans</h2>
-
-            <div className="flex justify-center mb-8">
-              <Tabs defaultValue="India" className="w-full max-w-[300px]" onValueChange={setSelectedRegion}>
-                <TabsList className="grid w-full grid-cols-3 rounded-md bg-white p-1 text-gray-500 shadow-sm">
-                  <TabsTrigger value="India">India</TabsTrigger>
-                  <TabsTrigger value="Europe">Europe</TabsTrigger>
-                  <TabsTrigger value="US">US</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            {loading ? (
-              <p className="text-center text-gray-600">Loading pricing plans...</p>
-            ) : error ? (
-              <p className="text-center text-red-500">{error}</p>
-            ) : (
-              <div className="grid gap-6 lg:grid-cols-3">
-                {pricingData.filter(plan => plan.region === selectedRegion).map((plan) => (
-                  <Card 
-                    key={plan.id} 
-                    className={`flex flex-col ${selectedPlan === plan.plan_type ? 'border-2 border-primary' : ''}`}
-                    onClick={() => setSelectedPlan(plan.plan_type)}
-                  >
-                    <CardHeader>
-                      <CardTitle className="text-2xl font-bold text-gray-800">
-                        {plan.plan_type}
-                        {plan.plan_type === 'Annual' && (
-                          <span className="ml-2 px-2 py-1 text-xs font-semibold text-white bg-primary rounded-full">
-                            Most Popular
-                          </span>
-                        )}
-                      </CardTitle>
-                      <p className="text-sm text-gray-600">
-                        {plan.plan_type === 'Monthly' ? 'Billed monthly' : 
-                         `Subscription time: ${plan.plan_type === 'Annual' ? '12 Months' : '6 Months'}`}
-                      </p>
-                      {plan.plan_type !== 'Monthly' && (
-                        <p className="text-sm text-gray-600">Billed monthly</p>
-                      )}
-                    </CardHeader>
-                    <CardContent className="flex flex-col flex-grow">
-                      <div className="mb-4">
-                        <p className="text-4xl font-bold mb-2 text-gray-800">
-                          {plan.currency}{plan.discounted_monthly_price?.toFixed(2) || '0.00'}/month
-                        </p>
-                        {plan.plan_type === 'Monthly' ? (
-                          <>
-                            <p className="text-sm text-gray-500 mb-1">
-                              <span className="line-through">Regular price: {plan.currency}{plan.monthly_price?.toFixed(2) || '0.00'}/month</span>
-                            </p>
-                            <p className="text-sm text-red-500 font-semibold">Limited Time Offer!</p>
-                          </>
-                        ) : (
-                          <p className="text-sm text-green-600">
-                            Save {plan.discount_percentage}% off regular price
-                          </p>
-                        )}
-                      </div>
-                      <ul className="space-y-2 mb-4 flex-grow">
-                        <li className="flex items-center">
-                          <Check className="mr-2 h-4 w-4 text-green-500" />
-                          <span className="text-sm text-gray-600">All Inclusive</span>
-                        </li>
-                        {plan.plan_type === 'Monthly' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">5 days a week, 1 hour sessions</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Zoom sessions with privacy</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Hardcore stretching</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Flexibility training</span>
-                            </li>
-                          </>
-                        )}
-                        {plan.plan_type === 'Annual' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Best value for money</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Great for consistent practitioners</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
-                            </li>
-                          </>
-                        )}
-                        {plan.plan_type === '6 Months' && (
-                          <>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Discounted rate for 6 months</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Great for Beginners</span>
-                            </li>
-                            <li className="flex items-center">
-                              <Check className="mr-2 h-4 w-4 text-green-500" />
-                              <span className="text-sm text-gray-600">Save compared to monthly plan</span>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                      <Button 
-                        onClick={() => handleSubscribeClick(plan.plan_type, selectedRegion)} 
-                        className="w-full"
-                        disabled={loadingPlan === plan.plan_type}
-                      >
-                        {loadingPlan === plan.plan_type ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (
-                          'Subscribe Now'
-                        )}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+    <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
+      <div className="container mx-auto px-4 md:px-6 max-w-6xl">
+        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">
+          Simple and Affordable Plans
+        </h2>
+        <div className="text-center mb-8">
+          <span className="inline-block bg-red-500 text-white text-lg font-semibold px-4 py-2 rounded-full animate-pulse shadow-lg shadow-red-500/50">
+            Limited Time Offer: {pricingPlans[0]?.discount_percentage}% OFF!
+          </span>
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          {pricingPlans.map((plan) => (
+            <Card key={plan.id} className="flex flex-col">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-800">{plan.region}</CardTitle>
+                <p className="text-sm text-gray-600">Monthly payment</p>
+              </CardHeader>
+              <CardContent className="flex flex-col flex-grow">
+                <div className="mb-4">
+                  <p className="text-4xl font-bold mb-2 text-gray-800">
+                    {plan.currency}{plan.discounted_price}
+                    <span className="text-lg font-normal">/month</span>
+                  </p>
+                  <p className="text-lg text-gray-500 line-through">
+                    {plan.currency}{plan.strike_through_price}/month
+                  </p>
+                  <p className="text-sm text-green-600 font-semibold">
+                    Save {plan.currency}{plan.savings}!
+                  </p>
+                </div>
+                <ul className="space-y-2 mb-4 flex-grow">
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-600">All Inclusive</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-600">5 days a week, 1 hour sessions</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Zoom sessions with privacy</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Hardcore stretching</span>
+                  </li>
+                  <li className="flex items-center">
+                    <Check className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm text-gray-600">Flexibility training</span>
+                  </li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button className="w-full">Subscribe Now</Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <p className="text-xl font-bold text-gray-800 bg-yellow-200 inline-block px-4 py-2 rounded-lg shadow-md mb-4">
+            Choose Your Session Type:
+          </p>
+          <div className="space-y-2">
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold">Private Mode:</span> Join group classes privately—others won't see you.
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold">Interactive Mode:</span> Join group classes and interact with others.
+            </p>
           </div>
-        </section>
-      </ScrollAnimation>
-      {showSuccessCard && (
-        <SubscriptionSuccessCard onClose={() => setShowSuccessCard(false)} />
-      )}
-    </>
-  );
-};
-
-export default PricingSection;
+          <p className="mt-2 text-md text-gray-600 italic font-medium">
+            Same session, same price!
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}

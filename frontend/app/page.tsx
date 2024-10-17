@@ -22,7 +22,8 @@ import { fetchYogaPricing } from '@/lib/subscriptionActions';
 import { handleSubscribeNow } from '@/lib/subscriptionActions';
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
-import PricingSection from '@/components/PricingSection'; // Import the new PricingSection component
+import PricingSection from '@/components/PricingSection'; // New pricing section
+// import PricingSection from '@/components/PricingSection_old'; // Old pricing section (commented out)
 
 interface PricingPlan {
   id: number;
@@ -52,7 +53,7 @@ export default function YogaLanding() {
             <div className="container px-4 md:px-6 relative z-10">
               <div className="text-center max-w-3xl mx-auto">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6">
-                  Transform Your Mind & Body with Yoga
+                  Transform Your Mind & Body with YogForever
                 </h1>
                 <p className="text-lg sm:text-xl text-gray-300 mb-8">
                   Join our tailored classes for all levels and invest in your future health.

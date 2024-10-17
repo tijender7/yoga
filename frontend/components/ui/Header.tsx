@@ -61,7 +61,7 @@ export default function Header({ showNavLinks = true }: HeaderProps) {
   return (
     <header className="px-2 sm:px-4 lg:px-6 h-14 flex items-center justify-between bg-white shadow-sm sticky top-0 z-50">
       <Link className="flex items-center justify-center" href="/">
-        <span className="text-lg sm:text-xl font-bold text-primary">YogaHarmony</span>
+        <span className="text-lg sm:text-xl font-bold text-primary">YogForever</span>
       </Link>
       <div className="flex items-center gap-1 sm:gap-2">
         {showNavLinks && (
