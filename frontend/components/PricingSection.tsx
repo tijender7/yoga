@@ -3,15 +3,20 @@ import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { handleSubscribeNow } from '@/lib/subscriptionActions'
+import RazorpayButton from './RazorpayButton';
+
 
 interface PricingPlan {
   id: number
+  plan_id: string
   region: string
   currency: string
   discounted_price: string
   discount_percentage: number
   strike_through_price: string
   savings: string
+  razorpay_button_id: string  // Add this line
 }
 
 const pricingPlans = [
@@ -53,6 +58,25 @@ export default function PricingSection() {
 
     fetchPricingPlans()
   }, [])
+
+  const handlePayNow = async (planId: string) => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      console.error('User not logged in');
+      // Implement your login logic here
+      return;
+    }
+    
+    try {
+      await handleSubscribeNow(user.id, planId, 'monthly', () => {
+        console.log('Subscription successful');
+        // Implement your success logic here
+      });
+    } catch (error) {
+      console.error('Subscription failed:', error);
+      // Implement your error handling here
+    }
+  };
 
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100">
@@ -108,8 +132,10 @@ export default function PricingSection() {
                   </li>
                 </ul>
               </CardContent>
-              <CardFooter>
-                <Button className="w-full">Subscribe Now</Button>
+              <CardFooter className="flex justify-center items-center">
+                <div className="w-full max-w-[200px]">
+                  <RazorpayButton buttonId={plan.razorpay_button_id} />
+                </div>
               </CardFooter>
             </Card>
           ))}
