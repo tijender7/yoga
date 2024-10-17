@@ -283,7 +283,7 @@ export default function YogaLanding() {
               <p className="max-w-[600px] text-gray-700 md:text-xl dark:text-gray-300 mx-auto mb-8">
                 Join our community today and start your journey towards a healthier, more balanced you.
               </p>
-              <Button size="lg">Get Started</Button>
+              <BookFreeClass buttonText="Get Started" />
             </div>
           </section>
         </ScrollAnimation>
