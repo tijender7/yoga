@@ -306,9 +306,16 @@ export default function YogaLanding() {
               <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">Frequently Asked Questions</h2>
               <Accordion type="single" collapsible className="w-full max-w-3xl mx-auto">
                 {[
-                  { question: 'What is the duration of each class?', answer: 'Our classes typically last 60 minutes, but we also offer 30-minute and 90-minute sessions for certain styles.' },
-                  { question: 'Do I need equipment?', answer: 'For most classes, you\'ll need a yoga mat. Some classes may require additional props like blocks or straps, but we\'ll let you know in advance.' },
-                  { question: 'What is your cancellation policy?', answer: 'You can cancel or reschedule a class up to 2 hours before it starts without any penalty.' },
+                  { question: 'What is the duration of each class?', answer: 'Our classes typically last 60 minutes, providing a comprehensive yoga experience.' },
+                  { question: 'Do I need any equipment for the classes?', answer: 'For most classes, you\'ll only need a yoga mat. We\'ll inform you in advance if any additional props like blocks or straps are required for specific sessions.' },
+                  { question: 'What is your cancellation policy?', answer: 'You can cancel or reschedule a class up to 2 hours before it starts without any penalty. However, for refunds on paid subscriptions, we have a 2-day cancellation policy from the date of purchase.' },
+                  { question: 'Can I choose between private and interactive sessions?', answer: 'Yes! We offer two session types at the same price: Private Mode where other participants won\'t see you, and Interactive Mode where you can interact with other participants. It\'s your choice how you want to experience the session.' },
+                  { question: 'How often are classes held?', answer: 'We offer classes five days a week, giving you flexibility in your practice schedule.' },
+                  { question: 'Are the classes suitable for beginners?', answer: 'Absolutely! We have classes for all levels, from beginners to advanced practitioners. Our instructors provide modifications to suit your experience level.' },
+                  { question: 'What styles of yoga do you offer?', answer: 'We offer a variety of yoga styles including Hatha, Vinyasa, Restorative, and more. Check our class schedule for specific style offerings.' },
+                  { question: 'How do I join the online classes?', answer: 'Once you\'ve booked a class, you\'ll receive a Zoom link via email. Simply click the link at the scheduled time to join the session.' },
+                  { question: 'What happens if I experience technical difficulties during a class?', answer: 'Our support team is available during class hours to assist with any technical issues. You can reach out via the chat function or email for immediate help.' },
+                  { question: 'Can I access recorded classes if I miss a live session?', answer: 'Unfortunately, we don\'t offer recorded classes. Our focus is on providing real-time, interactive experiences to ensure proper guidance and form correction.' },
                 ].map((faq, index) => (
                   <AccordionItem key={index} value={`item-${index}`}>
                     <AccordionTrigger className="text-gray-800">{faq.question}</AccordionTrigger>
@@ -324,35 +331,19 @@ export default function YogaLanding() {
         <div className="container px-4 md:px-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-gray-800">YogaHarmony</h3>
+              <h3 className="text-lg font-semibold text-gray-800">YogForever</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Transforming lives through the power of yoga.</p>
-              <div className="flex gap-4">
-                <Link href="#" className="text-gray-500 hover:text-gray-700">
-                  <Facebook className="w-6 h-6" />
-                  <span className="sr-only">Facebook</span>
-                </Link>
-                <Link href="#" className="text-gray-500 hover:text-gray-700">
-                  <Instagram className="w-6 h-6" />
-                  <span className="sr-only">Instagram</span>
-                </Link>
-                <Link href="#" className="text-gray-500 hover:text-gray-700">
-                  <MessageCircle className="w-6 h-6" />
-                  <span className="sr-only">MessageCircle</span>
-                </Link>
-              </div>
             </div>
             <div className="flex flex-col gap-4 lg:items-end">
               <form className="w-full max-w-sm">
                 <Input placeholder="Enter your email" type="email" />
                 <Button type="submit" className="mt-2 w-full">Subscribe to Newsletter</Button>
               </form>
-              <p className="text-sm text-gray-600 dark:text-gray-400">123 Yoga Street, Zen City, 12345</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">contact@yogaharmony.com</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">+1 (555) 123-4567</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">support@yogforever.com</p>
             </div>
           </div>
           <div className="mt-8 border-t pt-8 flex flex-col-reverse gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-xs text-gray-600 dark:text-gray-400">© 2023 YogaHarmony. All rights reserved.</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">© 2023 YogForever. All rights reserved.</p>
             <nav className="flex gap-4">
               <Link className="text-xs text-gray-600 hover:underline underline-offset-4" href="#">
                 Privacy Policy
