@@ -44,7 +44,11 @@ function GlowButton() {
   )
 }
 
-export default function Header() {
+type HeaderProps = {
+  showNavLinks?: boolean;
+};
+
+export default function Header({ showNavLinks = true }: HeaderProps) {
   const { user, loading } = useUser();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,16 +60,18 @@ export default function Header() {
 
   return (
     <header className="px-2 sm:px-4 lg:px-6 h-14 flex items-center justify-between bg-white shadow-sm sticky top-0 z-50">
-      <Link className="flex items-center justify-center" href="#">
+      <Link className="flex items-center justify-center" href="/">
         <span className="text-lg sm:text-xl font-bold text-primary">YogaHarmony</span>
       </Link>
       <div className="flex items-center gap-1 sm:gap-2">
-        <nav className="hidden md:flex items-center gap-4 mr-4">
-          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#about">About</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#services">Services</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#pricing">Pricing</Link>
-          <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="#contact">Contact</Link>
-        </nav>
+        {showNavLinks && (
+          <nav className="hidden md:flex items-center gap-4 mr-4">
+            <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="/#about">About</Link>
+            <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="/#services">Services</Link>
+            <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="/#pricing">Pricing</Link>
+            <Link className="text-sm font-medium text-gray-700 hover:text-gray-900 hover:underline underline-offset-4" href="/#contact">Contact</Link>
+          </nav>
+        )}
         {!loading && !user && (
           <Link href="/auth">
             <Button variant="outline" size="sm" className="text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">

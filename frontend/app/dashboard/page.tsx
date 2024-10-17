@@ -43,8 +43,7 @@ async function fetchSubscriptionData(userId: string) {
       payment_method,
       last_payment_date
     `)
-    .eq('user_id', userId)
-    .neq('status', 'created')
+ 
     .not('invoice_id', 'is', null)
     .order('created_at', { ascending: false })
 
@@ -77,6 +76,8 @@ export default function Dashboard() {
   const [subscriptionData, setSubscriptionData] = useState<Subscription[] | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+
 
   useEffect(() => {
     const checkUser = async () => {
@@ -113,9 +114,11 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      <Header />
+    <div className="min-h-screen bg-white">
+      <Header showNavLinks={true} />
       <main className="container py-6">
+       
+        
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
