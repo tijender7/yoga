@@ -57,47 +57,77 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
   const [isConfettiActive, setIsConfettiActive] = useState(false)
   const [healthConditions, setHealthConditions] = useState('')
   const [additionalInfo, setAdditionalInfo] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setNotification(null)
+    setIsLoading(true)
     
-    // Basic email validation
+    // Basic validation
+    if (!name.trim() || !email.trim()) {
+      setNotification({ type: 'error', message: "Please fill in all required fields." })
+      setIsLoading(false)
+      return
+    }
+
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       setNotification({ type: 'error', message: "Please enter a valid email address." })
-      return
-    }
-
-    // Check if email already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('free_class_bookings')
-      .select('email')
-      .eq('email', email)
-      .single()
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking email:', checkError)
-      setNotification({ type: 'error', message: "An error occurred. Please try again." })
-      return
-    }
-
-    if (existingUser) {
-      setNotification({ type: 'error', message: "This email is already registered. Please use a different email." })
+      setIsLoading(false)
       return
     }
 
     try {
+      // Check if email already exists in users table
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking email:', checkError)
+        setNotification({ type: 'error', message: "An error occurred. Please try again." })
+        setIsLoading(false)
+        return
+      }
+
+      // Check if user has already booked a free class
+      const { data: existingBooking, error: bookingError } = await supabase
+        .from('user_interactions')
+        .select('id')
+        .eq('email', email)
+        .eq('interest', 'Free Weekend Class')
+        .single()
+
+      if (bookingError && bookingError.code !== 'PGRST116') {
+        console.error('Error checking existing booking:', bookingError)
+        setNotification({ type: 'error', message: "An error occurred. Please try again." })
+        setIsLoading(false)
+        return
+      }
+
+      if (existingBooking) {
+        setNotification({ type: 'error', message: "You have already booked a free class. Please check your email for details." })
+        setIsLoading(false)
+        return
+      }
+
+      // Insert data into user_interactions table
       const { data, error } = await supabase
-        .from('free_class_bookings')
+        .from('user_interactions')
         .insert([
           { 
+            email,
             name, 
-            email, 
-            phone: phone ? `${countryCode}${phone}` : null,
-            country_code: phone ? countryCode : null,
+            phone_number: phone ? `${countryCode}${phone}` : null,
+            interest: 'Free Weekend Class',
             health_conditions: healthConditions || null,
             additional_info: additionalInfo || null,
+            source: 'get_started',
+            account_created: existingUser ? true : false
           }
         ])
 
@@ -108,6 +138,8 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
     } catch (error) {
       console.error('Error inserting data:', error)
       setNotification({ type: 'error', message: "An error occurred while booking your class. Please try again." })
+    } finally {
+      setIsLoading(false)
     }
   }
 
