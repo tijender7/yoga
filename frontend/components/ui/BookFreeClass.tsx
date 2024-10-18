@@ -64,22 +64,18 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
     setNotification(null)
     setIsLoading(true)
     
-    // Basic validation
-    if (!name.trim() || !email.trim()) {
-      setNotification({ type: 'error', message: "Please fill in all required fields." })
-      setIsLoading(false)
-      return
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setNotification({ type: 'error', message: "Please enter a valid email address." })
-      setIsLoading(false)
-      return
-    }
-
     try {
+      // Basic validation
+      if (!name.trim() || !email.trim()) {
+        throw new Error("Please fill in all required fields.")
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email)) {
+        throw new Error("Please enter a valid email address.")
+      }
+
       // Check if email already exists in users table
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
@@ -88,10 +84,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         .single()
 
       if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking email:', checkError)
-        setNotification({ type: 'error', message: "An error occurred. Please try again." })
-        setIsLoading(false)
-        return
+        throw new Error(`Error checking email: ${checkError.message}`)
       }
 
       // Check if user has already booked a free class
@@ -103,16 +96,41 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         .single()
 
       if (bookingError && bookingError.code !== 'PGRST116') {
-        console.error('Error checking existing booking:', bookingError)
-        setNotification({ type: 'error', message: "An error occurred. Please try again." })
-        setIsLoading(false)
-        return
+        throw new Error(`Error checking existing booking: ${bookingError.message}`)
       }
 
       if (existingBooking) {
-        setNotification({ type: 'error', message: "You have already booked a free class. Please check your email for details." })
-        setIsLoading(false)
-        return
+        throw new Error("You have already booked a free class. Please check your email for details.")
+      }
+
+      let userId = existingUser?.id
+
+      if (!existingUser) {
+        // Create a new user account
+        const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+          email: email,
+          password: Math.random().toString(36).slice(-8), // Generate a random password
+          options: {
+            data: {
+              full_name: name,
+            }
+          }
+        })
+
+        if (signUpError) {
+          throw new Error(`Error creating user: ${signUpError.message}`)
+        }
+
+        userId = newUser?.user?.id
+
+        // Send password reset email
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        })
+
+        if (resetError) {
+          throw new Error(`Error sending reset password email: ${resetError.message}`)
+        }
       }
 
       // Insert data into user_interactions table
@@ -131,15 +149,26 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
           }
         ])
 
-      if (error) throw error
+      if (error) {
+        throw new Error(`Error inserting data: ${error.message}`)
+      }
 
       setIsDialogOpen(false)
       showConfirmation()
-    } catch (error) {
-      console.error('Error inserting data:', error)
-      setNotification({ type: 'error', message: "An error occurred while booking your class. Please try again." })
+      if (!existingUser) {
+        setNotification({ type: 'success', message: "Your account has been created. Please check your email to set your password and access your free classes." })
+      } else {
+        setNotification({ type: 'success', message: "You've successfully booked your free class. Check your email for details." })
+      }
+    } catch (error: unknown) {
+      console.error('Error in handleSubmit:', error);
+      if (error instanceof Error) {
+        setNotification({ type: 'error', message: error.message || "An unexpected error occurred. Please try again." });
+      } else {
+        setNotification({ type: 'error', message: "An unexpected error occurred. Please try again." });
+      }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
