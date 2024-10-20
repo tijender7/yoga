@@ -106,14 +106,15 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
       let userId = existingUser?.id
 
       if (!existingUser) {
-        // Create a new user account
+        // Create a new user account with email confirmation
         const { data: newUser, error: signUpError } = await supabase.auth.signUp({
           email: email,
           password: Math.random().toString(36).slice(-8), // Generate a random password
           options: {
             data: {
               full_name: name,
-            }
+            },
+            emailRedirectTo: `${window.location.origin}/reset-password`
           }
         })
 
@@ -123,18 +124,20 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
 
         userId = newUser?.user?.id
 
-        // Send password reset email
-        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+        setNotification({ 
+          type: 'success', 
+          message: "Your account has been created. Please check your email to confirm your account and set your password." 
         })
-
-        if (resetError) {
-          throw new Error(`Error sending reset password email: ${resetError.message}`)
-        }
+      } else {
+        // Existing user, just book the class
+        setNotification({ 
+          type: 'success', 
+          message: "You've successfully booked your free class. Check your email for details." 
+        })
       }
 
       // Insert data into user_interactions table
-      const { data, error } = await supabase
+      const { error: interactionError } = await supabase
         .from('user_interactions')
         .insert([
           { 
@@ -145,30 +148,25 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
             health_conditions: healthConditions || null,
             additional_info: additionalInfo || null,
             source: 'get_started',
-            account_created: existingUser ? true : false
+            account_created: !existingUser
           }
         ])
 
-      if (error) {
-        throw new Error(`Error inserting data: ${error.message}`)
+      if (interactionError) {
+        throw new Error(`Error inserting interaction data: ${interactionError.message}`)
       }
 
       setIsDialogOpen(false)
       showConfirmation()
-      if (!existingUser) {
-        setNotification({ type: 'success', message: "Your account has been created. Please check your email to set your password and access your free classes." })
-      } else {
-        setNotification({ type: 'success', message: "You've successfully booked your free class. Check your email for details." })
-      }
     } catch (error: unknown) {
-      console.error('Error in handleSubmit:', error);
+      console.error('Error in handleSubmit:', error)
       if (error instanceof Error) {
-        setNotification({ type: 'error', message: error.message || "An unexpected error occurred. Please try again." });
+        setNotification({ type: 'error', message: error.message || "An unexpected error occurred. Please try again." })
       } else {
-        setNotification({ type: 'error', message: "An unexpected error occurred. Please try again." });
+        setNotification({ type: 'error', message: "An unexpected error occurred. Please try again." })
       }
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
