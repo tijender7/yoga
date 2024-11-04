@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
 from pydantic import BaseModel
-from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription, update_subscription_status, check_subscription_status_from_db
+from app.services.razorpay_service import create_or_get_razorpay_customer, create_subscription, check_subscription_status, fetch_subscription_details, create_payment_link, insert_subscription, update_subscription_status, check_subscription_status_from_db, get_user_details
 from app.db import supabase
 import logging
 import json
@@ -162,55 +162,77 @@ async def razorpay_webhook(request: Request):
     try:
         payload = await request.body()
         data = json.loads(payload)
-        event = data['event']
-        logger.info(f"[WEBHOOK] Received Razorpay webhook: {event}")
-        logger.debug(f"[WEBHOOK] Full payload: {json.dumps(data, indent=2)}")
-        subscription = data['payload'].get('subscription', {}).get('entity', {})
+        
+        logger.info(f"[WEBHOOK] Received payload: {data}")
+        
+        event = data.get('event')
         payment = data['payload'].get('payment', {}).get('entity', {})
-        payment_id = None
-        subscription_id = subscription.get('id')
-        status = subscription.get('status')
-        payment_id = payment.get('id')
-        amount_paid = payment.get('amount', 0) / 100  # Convert to rupees
-        logger.info(f"[WEBHOOK] Subscription event: {event}")
-        update_data = {
-            'status': status,
-            'total_count': subscription.get('total_count'),
-            'paid_count': subscription.get('paid_count'),
-            'remaining_count': subscription.get('remaining_count'),
-            'next_payment_date': datetime.fromtimestamp(subscription.get('charge_at', 0)).isoformat() if subscription.get('charge_at') else None,
+        
+        # Get email from payment data
+        email = payment.get('email')
+        
+        # Fetch user details from Supabase using email
+        user_response = supabase.table('users').select('*').eq('email', email).execute()
+        
+        user_details = None
+        if user_response.data:
+            user_details = user_response.data[0]
+            
+        # Prepare payment data with verified user details
+        payment_data = {
+            'razorpay_payment_id': payment.get('id'),
+            'razorpay_order_id': payment.get('order_id'),
+            'status': payment.get('status'),
+            'amount': payment.get('amount') / 100,
+            'currency': payment.get('currency'),
+            'payment_method': payment.get('method'),
+            'user_id': user_details.get('id') if user_details else None,
+            'email': user_details.get('email') if user_details else email,
+            'contact': user_details.get('contact') if user_details else payment.get('contact'),
+            'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
-            'order_id': payment.get('order_id'),
-            'invoice_id': payment.get('invoice_id'),
-            'current_start': datetime.fromtimestamp(subscription.get('current_start', 0)).isoformat() if subscription.get('current_start') else None,
-            'current_end': datetime.fromtimestamp(subscription.get('current_end', 0)).isoformat() if subscription.get('current_end') else None,
-            'payment_method': subscription.get('payment_method') or payment.get('method'),
+            'payment_details': {
+                'wallet': payment.get('wallet'),
+                'international': payment.get('international'),
+                'fee': payment.get('fee'),
+                'tax': payment.get('tax'),
+                'acquirer_data': payment.get('acquirer_data')
+            }
         }
         
-        # Check if payment information is available
-        if payment:
-            currency = payment.get('currency')
-            if payment_id:
-                update_data['last_payment_id'] = payment_id
-                update_data['last_payment_date'] = datetime.now().isoformat()
-        else:
-            currency = None
-
-        if event in ['subscription.authenticated', 'subscription.activated', 'subscription.charged', 'invoice.paid', 'order.paid']:
-            # Update subscription in database
-            update_result = supabase.table('subscriptions').update(update_data).eq('razorpay_subscription_id', subscription_id).execute()
-            
-            logger.info(f"[WEBHOOK] Subscription {subscription_id} updated:")
-            logger.info(f"Status: {status}, Payment ID: {payment_id}, Amount: {amount_paid}")
-            logger.info(f"Next payment date: {update_data['next_payment_date']}")
-            if payment_id:
-                logger.info(f"[WEBHOOK] Payment ID: {payment_id}")
+        logger.info(f"[WEBHOOK] Payment data to insert: {payment_data}")
         
-        logger.info(f"[WEBHOOK] Subscription ID: {subscription_id}")
-        return {"status": "success", "message": f"Event {event} processed"}
+        try:
+            # First try to update if payment exists
+            update_result = supabase.table('payments')\
+                .update(payment_data)\
+                .eq('razorpay_payment_id', payment_data['razorpay_payment_id'])\
+                .execute()
+                
+            if not update_result.data:
+                # If no rows were updated, insert new payment
+                insert_result = supabase.table('payments')\
+                    .insert(payment_data)\
+                    .execute()
+                logger.info(f"[WEBHOOK] Payment inserted successfully")
+            else:
+                logger.info(f"[WEBHOOK] Payment updated successfully")
+                
+            return {'status': 'success'}
+            
+        except Exception as db_error:
+            logger.error(f"[WEBHOOK] Database operation failed: {str(db_error)}")
+            return JSONResponse(
+                status_code=500,
+                content={"error": str(db_error)}
+            )
+            
     except Exception as e:
-        logger.error(f"[WEBHOOK] Error processing webhook: {str(e)}", exc_info=True)
-        return {"status": "error", "message": str(e)}
+        logger.error(f"[WEBHOOK] Error processing webhook: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
 async def update_subscription_status(subscription_id: str, status: str, payment_id: str = None):
     logger.info(f"[WEBHOOK] Updating subscription status: {subscription_id} to {status}")

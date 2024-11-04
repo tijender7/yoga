@@ -3,7 +3,7 @@ import logging
 from dotenv import load_dotenv
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.INFO,  # Set to INFO or DEBUG based on your needs
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 

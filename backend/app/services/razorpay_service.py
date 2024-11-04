@@ -200,3 +200,22 @@ async def update_subscription_status(subscription_id: str, event_type: str):
     except Exception as e:
         logger.error(f"Error updating subscription status: {str(e)}")
         return "error"
+
+async def get_user_details(user_id: str):
+    try:
+        # Fetch user details from Supabase
+        user_response = supabase.table('users').select('*').eq('id', user_id).execute()
+        
+        if not user_response.data:
+            logger.error(f"User not found: {user_id}")
+            return None
+            
+        user_data = user_response.data[0]
+        return {
+            'email': user_data.get('email'),
+            'full_name': user_data.get('full_name'),
+            'contact': user_data.get('contact')
+        }
+    except Exception as e:
+        logger.error(f"Error fetching user details: {str(e)}")
+        return None
