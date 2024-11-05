@@ -25,20 +25,7 @@ export function useUser() {
     }
 
     getInitialSession()
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
-      }
-    )
-
-    return () => {
-      mounted = false
-      authListener.subscription.unsubscribe()
-    }
   }, [])
 
   return { user, loading, error, setUser }
 }
-

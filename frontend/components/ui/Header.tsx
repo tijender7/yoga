@@ -58,6 +58,13 @@ export default function Header({ showNavLinks = true }: HeaderProps) {
     window.location.href = '/';
   };
 
+  const navigation = [
+    { name: 'About', href: '#about' },
+    { name: 'Services', href: '#services' },
+    { name: 'Pricing', href: '#pricing' },
+    { name: 'Contact', href: '#contact' },
+  ];
+
   return (
     <header className="px-2 sm:px-4 lg:px-6 h-14 flex items-center justify-between bg-white shadow-sm sticky top-0 z-50">
       <Link className="flex items-center justify-center" href="/">
@@ -96,10 +103,6 @@ export default function Header({ showNavLinks = true }: HeaderProps) {
               <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                 <User className="mr-2 h-4 w-4" />
                 <span>My Account</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard className="mr-2 h-4 w-4" />
-                <span>Billing</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />

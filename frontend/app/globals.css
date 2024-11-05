@@ -97,6 +97,10 @@ html {
   scroll-behavior: smooth;
 }
 
+section[id] {
+  scroll-margin-top: 4rem; /* Adjust this value based on your header height (64px = 4rem) */
+}
+
 .animate-in {
   animation: fadeIn 1s ease-out forwards;
 }
@@ -120,4 +124,64 @@ html {
 .custom-toast [data-icon] {
   color: #22c55e !important;
   font-size: 1.5rem !important;
+}
+
+.text-shadow-lg {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes border-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+  }
+}
+
+.animate-border-flash {
+  animation: border-flash 2s infinite;
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.animate-border-flash::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  100% {
+    left: 200%;
+  }
+}
+
+/* Add this if you're using CSS variables for your primary color */
+:root {
+  --primary-rgb: 124, 58, 237; /* Replace with your primary color RGB values */
+}
+
+.button-glow {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.button-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
 }

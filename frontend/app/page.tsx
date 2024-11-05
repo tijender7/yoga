@@ -24,6 +24,7 @@ import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import PricingSection from '@/components/PricingSection'; // New pricing section
 // import PricingSection from '@/components/PricingSection_old'; // Old pricing section (commented out)
+import ContactFooterForm from '@/components/ui/ContactFooterForm'
 
 interface PricingPlan {
   id: number;
@@ -52,16 +53,18 @@ export default function YogaLanding() {
             </div>
             <div className="container px-4 md:px-6 relative z-10">
               <div className="text-center max-w-3xl mx-auto">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl text-white mb-6 text-shadow-lg">
                   Transform Your Mind & Body with YogForever
                 </h1>
-                <p className="text-lg sm:text-xl text-gray-300 mb-8">
+                <p className="text-lg sm:text-xl text-gray-100 mb-8 bg-gray-900/30 p-4 rounded-lg backdrop-blur-sm mx-auto">
                   Join our tailored classes for all levels and invest in your future health.
                   Age gracefully with yoga - your key to a vibrant, pain-free life.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" className="w-full sm:w-auto bg-white text-gray-900 hover:bg-gray-100">Start Your Journey</Button>
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-gray-900">Explore Classes</Button>
+                <div className="flex justify-center">
+                  <BookFreeClass 
+                    buttonText="Start Free Trial Class" 
+                    buttonClassName="relative w-full sm:w-auto bg-white/90 text-gray-900 hover:bg-white text-xl font-semibold transition-all duration-200 px-10 py-5 rounded-lg border-2 border-white shadow-[0_0_15px_rgba(255,255,255,0.5)] hover:shadow-[0_0_20px_rgba(255,255,255,0.7)] hover:scale-105"
+                  />
                 </div>
               </div>
             </div>
@@ -209,8 +212,99 @@ export default function YogaLanding() {
           </section>
         </ScrollAnimation>
         
-        {/* Insert the new PricingSection component here */}
-        <PricingSection />
+        <ScrollAnimation>
+          <section id="services" className="w-full py-12 md:py-24 lg:py-32 bg-white scroll-mt-14">
+            <div className="container px-4 md:px-6">
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-12 text-gray-800">
+                Our Specialized Services
+              </h2>
+              
+              <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {/* Posture Correction Card */}
+                <Card className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Dumbbell className="w-6 h-6 text-primary" />
+                      Posture Correction
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Spine issues treatment</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Shoulder problem solutions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Gut health improvement</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Strength Training Card */}
+                <Card className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Flame className="w-6 h-6 text-primary" />
+                      Strength Training
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Core strength development</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Muscle toning exercises</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Body weight training</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                {/* Complete Fitness Card */}
+                <Card className="flex flex-col">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="w-6 h-6 text-primary" />
+                      Complete Fitness
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Flexibility training</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Strength conditioning</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-green-500 mt-0.5" />
+                        <span>Balanced workout routines</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </section>
+        </ScrollAnimation>
+        
+        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 scroll-mt-14">
+          <PricingSection />
+        </section>
         
         <ScrollAnimation>
           <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
@@ -327,31 +421,57 @@ export default function YogaLanding() {
           </section>
         </ScrollAnimation>
       </main>
-      <footer id="contact" className="w-full py-6 bg-white">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-gray-800">YogForever</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Transforming lives through the power of yoga.</p>
+      <footer id="contact" className="w-full py-12 bg-white border-t">
+        <div className="container px-4 md:px-6 mx-auto max-w-6xl">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+            {/* Company Info */}
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-black">YogForever</h3>
+              <p className="text-gray-600 max-w-sm">
+                Transforming lives through the power of yoga. Join our community and start your wellness journey today.
+              </p>
+              <div className="pt-2">
+                <p className="text-gray-600">Email us at:</p>
+                <a href="mailto:support@yogforever.com" className="text-black font-medium hover:text-gray-600 transition-colors">
+                  support@yogforever.com
+                </a>
+              </div>
             </div>
-            <div className="flex flex-col gap-4 lg:items-end">
-              <form className="w-full max-w-sm">
-                <Input placeholder="Enter your email" type="email" />
-                <Button type="submit" className="mt-2 w-full">Subscribe to Newsletter</Button>
-              </form>
-              <p className="text-sm text-gray-600 dark:text-gray-400">support@yogforever.com</p>
+
+            {/* Contact Form Section */}
+            <div className="space-y-4">
+              <h4 className="text-2xl font-bold text-black">Get in Touch</h4>
+              <p className="text-gray-600">
+                Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              </p>
+              <div className="mt-4">
+                <ContactFooterForm />
+              </div>
             </div>
           </div>
-          <div className="mt-8 border-t pt-8 flex flex-col-reverse gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <p className="text-xs text-gray-600 dark:text-gray-400">© 2023 YogForever. All rights reserved.</p>
-            <nav className="flex gap-4">
-              <Link className="text-xs text-gray-600 hover:underline underline-offset-4" href="#">
-                Privacy Policy
-              </Link>
-              <Link className="text-xs text-gray-600 hover:underline underline-offset-4" href="#">
-                Terms of Service
-              </Link>
-            </nav>
+
+          {/* Footer Bottom */}
+          <div className="pt-8 border-t border-gray-200">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <div className="text-gray-600 text-sm">
+                © {new Date().getFullYear()} YogForever. All rights reserved.
+              </div>
+              <div className="flex items-center space-x-8">
+                <Link 
+                  href="/privacy-policy" 
+                  className="text-sm text-gray-600 hover:text-black transition-colors"
+                >
+                  Privacy Policy
+                </Link>
+                <Link 
+                  href="/terms" 
+                  className="text-sm text-gray-600 hover:text-black transition-colors"
+                >
+                  Terms of Service
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

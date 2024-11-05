@@ -100,12 +100,7 @@ def update_user_profile(user_id: str, customer_id: str):
         logger.error(f"Failed to update profile for user {user_id}: {str(e)}")
 
 
-@app.post("/auth/callback")
-async def auth_callback(user: dict, background_tasks: BackgroundTasks):
-    user_id = user.get('id')
-    if user_id:
-        background_tasks.add_task(create_or_get_razorpay_customer, user_id)
-    return {"status": "success"}
+
 
 async def create_user_profile(user_id: str, email: str, full_name: str = ''):
     logger.info(f"Attempting to create profile for user {user_id}")
@@ -287,19 +282,8 @@ async def create_subscription_endpoint(subscription_data: dict):
         razorpay_plan_id = plan_response.data[0]['razorpay_plan_id']
         logger.info(f"[STEP 2] Fetched razorpay_plan_id: {razorpay_plan_id}")
 
-        logger.info(f"[STEP 3] Fetching Razorpay customer ID for user: {user_id}")
-        customer_response = supabase.table('razorpay_customers').select('razorpay_customer_id').eq('id', user_id).execute()
-        logger.info(f"[STEP 3] Customer response: {customer_response}")
-
-        if not customer_response.data:
-            logger.error(f"[ERROR] No Razorpay customer found for user {user_id}")
-            raise HTTPException(status_code=404, detail="Razorpay customer not found")
-
-        razorpay_customer_id = customer_response.data[0]['razorpay_customer_id']
-        logger.info(f"[STEP 3] Fetched razorpay_customer_id: {razorpay_customer_id}")
-
-        logger.info(f"[STEP 4] Creating subscription for customer: {razorpay_customer_id} with plan: {razorpay_plan_id}")
-        subscription_id, status, payment_link = await create_subscription(razorpay_customer_id, razorpay_plan_id)
+        logger.info(f"[STEP 4] Creating subscription with plan: {razorpay_plan_id}")
+        subscription_id, status, payment_link = await create_subscription(razorpay_plan_id)
         logger.info(f"[STEP 4] Subscription created: {subscription_id}, Status: {status}, Payment link: {payment_link}")
 
         # New code to insert subscription data into Supabase
