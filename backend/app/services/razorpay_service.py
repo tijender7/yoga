@@ -43,7 +43,6 @@ async def create_or_get_razorpay_customer(user_id: str, max_retries=3):
                 "email": email,
             })
             logger.info(f"Razorpay customer creation response: {customer}")
-
             # Insert into razorpay_customers table
             result = supabase.table('razorpay_customers').insert({
                 'id': user_id,

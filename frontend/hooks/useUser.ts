@@ -30,19 +30,6 @@ export function useUser() {
       async (event, session) => {
         setUser(session?.user ?? null)
         setLoading(false)
-        if (event === 'SIGNED_IN') {
-          try {
-            // Call your backend API to create Razorpay customer
-            const response = await fetch('/api/create-razorpay-customer', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId: session?.user.id })
-            })
-            if (!response.ok) throw new Error('Failed to create Razorpay customer')
-          } catch (e) {
-            setError(e instanceof Error ? e.message : 'Failed to set up user profile')
-          }
-        }
       }
     )
 
@@ -54,3 +41,4 @@ export function useUser() {
 
   return { user, loading, error, setUser }
 }
+

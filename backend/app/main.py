@@ -65,9 +65,6 @@ async def create_user(user_data: dict, background_tasks: BackgroundTasks):
             logger.error(f"Error inserting user: {response.error}")
             raise HTTPException(status_code=500, detail="Failed to create user in the database")
 
-        # If no error, assume success
-        # 2. Trigger Razorpay customer creation (if needed)
-        background_tasks.add_task(create_or_get_razorpay_customer, user_id) 
 
         return {"status": "success"}
     except Exception as e:
@@ -102,22 +99,6 @@ def update_user_profile(user_id: str, customer_id: str):
     except Exception as e:
         logger.error(f"Failed to update profile for user {user_id}: {str(e)}")
 
-@app.post("/api/create-razorpay-customer")
-async def create_customer(user_data: dict, background_tasks: BackgroundTasks):
-    user_id = user_data.get('userId')
-    if not user_id:
-        raise HTTPException(status_code=400, detail="User ID is required")
-
-    try:
-        customer_id = await create_or_get_razorpay_customer(user_id)
-        if customer_id:
-            background_tasks.add_task(update_user_profile, user_id, customer_id)
-            return {"status": "success", "customer_id": customer_id}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to create Razorpay customer")
-    except Exception as e:
-        logger.error(f"Error in create_customer: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/auth/callback")
 async def auth_callback(user: dict, background_tasks: BackgroundTasks):
