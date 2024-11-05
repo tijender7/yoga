@@ -118,7 +118,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         .from('profiles')
         .insert({
           id: newUser.user.id,
-          username: email.split('@')[0], // Generate username from email
+          username: name.toLowerCase().replace(/\s+/g, '_'), // Convert name to lowercase and replace spaces with underscore
           full_name: name,
           phone: phone ? `${countryCode}${phone}` : null
         })
@@ -136,7 +136,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         body: JSON.stringify({
           userId: newUser.user.id,
           email: email,
-          username: email.split('@')[0],
+          username: name.toLowerCase().replace(/\s+/g, '_'), // Same username format
           name: name,
           phone: phone ? `${countryCode}${phone}` : null,
           healthConditions: healthConditions || null

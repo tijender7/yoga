@@ -118,7 +118,11 @@ async function fetchPaymentHistory(userId: string) {
 // Improved getInitials function with proper type checking
 const getInitials = (name: string | undefined | null): string => {
   if (!name) return '?';
-  return name.split(' ')[0].charAt(0).toUpperCase();
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase())
+    .slice(0, 2)  // Take first two initials if available
+    .join('');
 };
 
 export default function Dashboard() {
@@ -151,10 +155,14 @@ export default function Dashboard() {
     const fetchUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Fetch user details from users table
+        // Fetch user details from both users and profiles tables
         const { data, error } = await supabase
-          .from('users')
-          .select('username, email')
+          .from('profiles')
+          .select(`
+            full_name,
+            username,
+            phone
+          `)
           .eq('id', user.id)
           .single();
           
@@ -197,11 +205,13 @@ export default function Dashboard() {
               <Avatar className="h-20 w-20 border-2 border-primary/10">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
                 <AvatarFallback className="bg-primary/5 text-lg">
-                  {getInitials(userData?.username)}
+                  {getInitials(userData?.full_name)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <CardTitle className="text-2xl">{userData?.username || 'User'}</CardTitle>
+                <CardTitle className="text-2xl">
+                  {userData?.full_name || userData?.username || 'User'}
+                </CardTitle>
                 <CardDescription className="text-base">{userData?.email}</CardDescription>
               </div>
             </div>

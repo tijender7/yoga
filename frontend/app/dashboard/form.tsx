@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -7,9 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { HelpCircle } from "lucide-react"
 import { supabase } from '@/lib/supabase'
-import { useUser } from '@/hooks/useUser' // If you have a user hook
 
-// Form interface type
 interface FormData {
   name: string;
   email: string;
@@ -20,29 +18,57 @@ export default function ContactFormModal() {
   const [isOpen, setIsOpen] = useState(false)
   const [form, setForm] = useState<FormData>({ name: '', email: '', message: '' })
   const [isLoading, setIsLoading] = useState(false)
-  const { user } = useUser() // Get current user if available
+  const [userData, setUserData] = useState<any>(null)
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('full_name, username')
+          .eq('id', user.id)
+          .single()
+
+        if (data) {
+          setUserData(data)
+          // Pre-fill the form with user data
+          setForm(prev => ({
+            ...prev,
+            name: data.full_name || data.username,
+            email: user.email || ''
+          }))
+        }
+      }
+    }
+    fetchUserData()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+
       // Insert message into Supabase
-      const { data, error } = await supabase
+      const { error: dbError } = await supabase
         .from('contact_messages')
         .insert([
           {
             name: form.name,
             email: form.email,
             message: form.message,
-            user_id: user?.id // Add user_id if user is logged in
+            user_id: user?.id
           }
         ])
 
-      if (error) throw error
+      if (dbError) throw dbError
 
-      // Optional: Send email notification using Edge function
-      await fetch('/api/send-contact-notification', {
+      // Send email notification
+      const response = await fetch('/api/send-contact-notification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,16 +76,25 @@ export default function ContactFormModal() {
         body: JSON.stringify({
           name: form.name,
           email: form.email,
-          message: form.message
+          message: form.message,
+          userId: user?.id
         }),
       })
+
+      const responseData = await response.json()
+
+      if (!response.ok) {
+        throw new Error(`Failed to send email notification: ${responseData.details || 'Unknown error'}`)
+      }
       
       toast.success("Support request sent successfully! We'll get back to you soon.")
       setIsOpen(false)
-      setForm({ name: '', email: '', message: '' })
-    } catch (error) {
-      console.error('Error sending message:', error)
-      toast.error("Failed to send message. Please try again.")
+      setForm(prev => ({ ...prev, message: '' })) // Only clear message, keep user details
+    } catch (err) {
+      // Properly type the error
+      const error = err as Error;
+      console.error('Error sending message:', error);
+      toast.error(error.message || "Failed to send message. Please try again.");
     } finally {
       setIsLoading(false)
     }
@@ -101,6 +136,7 @@ export default function ContactFormModal() {
               value={form.name}
               onChange={handleInputChange}
               required
+              disabled={!!userData} // Disable if user data exists
               className="bg-white border-gray-300 text-black"
             />
           </div>
@@ -112,6 +148,7 @@ export default function ContactFormModal() {
               value={form.email}
               onChange={handleInputChange}
               required
+              disabled={!!userData} // Disable if user data exists
               className="bg-white border-gray-300 text-black"
             />
           </div>
@@ -123,6 +160,7 @@ export default function ContactFormModal() {
               onChange={handleInputChange}
               required
               className="bg-white border-gray-300 text-black min-h-[100px]"
+              placeholder="How can we help you?"
             />
           </div>
           <Button 
