@@ -13,7 +13,7 @@ import YogaCarousel from '@/components/ui/YogaCarousel';
 import FlowingYogaEnergyBackground from '@/components/ui/FlowingYogaEnergyBackground';
 import StickyJoinForm from '@/components/ui/StickyJoinForm';
 import { ScrollAnimation } from '@/components/ui/ScrollAnimation';
-
+import TestimonialsCarousel from '@/components/ui/TestimonialsCarousel';
 import BookFreeClass from '@/components/ui/BookFreeClass';
 import { Toaster } from 'sonner';
 import Header from '@/components/ui/Header';
@@ -309,39 +309,10 @@ export default function YogaLanding() {
         <ScrollAnimation>
           <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32">
             <div className="container px-4 md:px-6">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">What Our Clients Say</h2>
-              <div className="grid gap-6 lg:grid-cols-3">
-                {[
-                  { name: 'Priya Sharma', quote: 'Transformed my practice!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test1.jpg' },
-                  { name: 'Emma Wilson', quote: 'Best yoga classes ever!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test2.jpg' },
-                  { name: 'Olivia Thompson', quote: 'Incredible instructor and community!', rating: 5, image: 'https://dmewjfaaihwxscvhzmxv.supabase.co/storage/v1/object/public/images/students/test3.jfif' },
-                ].map((testimonial, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <Image
-                          src={testimonial.image}
-                          alt={testimonial.name}
-                          width={100}
-                          height={100}
-                          style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                          className="rounded-full"
-                          unoptimized
-                        />
-                        <div>
-                          <p className="font-semibold text-gray-800">{testimonial.name}</p>
-                          <div className="flex">
-                            {[...Array(testimonial.rating)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 fill-current text-yellow-400" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-gray-700 dark:text-gray-300">"{testimonial.quote}"</p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-center mb-8 text-gray-800">
+                What Our Clients Say
+              </h2>
+              <TestimonialsCarousel />
             </div>
           </section>
         </ScrollAnimation>

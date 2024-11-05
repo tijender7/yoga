@@ -50,10 +50,7 @@ if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET or not RAZORPAY_WEBHOOK_SECRET
 
 # Add this after loading environment variables
 logger = logging.getLogger(__name__)
-logger.info(f"[CONFIG] Loaded RAZORPAY_KEY_ID: {RAZORPAY_KEY_ID[:5]}...")
-logger.info(f"[CONFIG] Loaded RAZORPAY_KEY_SECRET: {RAZORPAY_KEY_SECRET[:5]}...")
-logger.info(f"[CONFIG] Loaded RAZORPAY_WEBHOOK_SECRET: {RAZORPAY_WEBHOOK_SECRET[:5]}...")
-logger.info(f"[CONFIG] RAZORPAY_CALLBACK_URL set to: {RAZORPAY_CALLBACK_URL}")
+logger.info("Payment gateway configuration loaded successfully")
 
 # Validation add karein
 if not NGROK_URL:

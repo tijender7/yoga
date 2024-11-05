@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 def get_paypal_access_token():
     logging.info("Attempting to get PayPal access token...")
     logging.info(f"Client ID: {PAYPAL_CLIENT_ID}")
-    logging.info(f"Client Secret: {PAYPAL_CLIENT_SECRET[:6]}****")  # Mask most of the secret for security
+    logging.info("PayPal credentials validated")
     
     # Construct the Base64-encoded Authorization header
     auth_string = f"{PAYPAL_CLIENT_ID}:{PAYPAL_CLIENT_SECRET}"

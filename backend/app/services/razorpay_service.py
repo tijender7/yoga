@@ -14,6 +14,16 @@ import json
 client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 
+def secure_log(message: str, data: dict = None):
+    """Securely log messages without sensitive data"""
+    if data:
+        # Remove sensitive fields
+        safe_data = {k: '****' if k in ['key', 'secret', 'password', 'token'] else v 
+                    for k, v in data.items()}
+        message = f"{message} - {safe_data}"
+    logger.info(message)
+
+
 async def create_subscription(plan_id: str):
     try:
         subscription = client.subscription.create({

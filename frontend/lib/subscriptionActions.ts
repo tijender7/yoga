@@ -102,11 +102,11 @@ export async function checkSubscriptionStatus(userId: string) {
       console.log(`[SUCCESS] Subscription status: ${data.subscription_status}`);
       return data.subscription_status;
     } else {
-      console.error(`[ERROR] HTTP error! status: ${response.status}, message: ${data.message}`);
+      console.error('Subscription status check failed');
       return 'error';
     }
   } catch (error) {
-    console.error('[ERROR] Error checking subscription status:', error);
+    console.error('Subscription status check failed');
     return 'error';
   }
 }

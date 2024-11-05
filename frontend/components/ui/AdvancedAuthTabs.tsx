@@ -358,7 +358,7 @@ export default function AdvancedAuthTabs() {
       console.error('Password reset failed:', error)
       setAlert({
         type: 'error',
-        message: error.message || 'An unexpected error occurred during password reset.'
+        message: 'Password reset failed. Please try again.'
       })
     } finally {
       setIsLoading(false)

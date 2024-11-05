@@ -391,14 +391,6 @@ Sessions are held Monday to Friday.`;
                   >
                     Email Link
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      toast.success("Class link bookmarked!");
-                    }}
-                  >
-                    Bookmark
-                  </Button>
                 </div>
               </div>
 
@@ -448,14 +440,6 @@ Sessions are held Monday to Friday.`;
                     }}
                   >
                     Email Link
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      toast.success("Class link bookmarked!");
-                    }}
-                  >
-                    Bookmark
                   </Button>
                 </div>
               </div>
