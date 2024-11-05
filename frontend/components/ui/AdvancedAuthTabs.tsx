@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, AlertCircle, Check, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { AuthError } from '@supabase/supabase-js'
+import { useRouter } from 'next/navigation'
 
 export default function AdvancedAuthTabs() {
   const [activeTab, setActiveTab] = useState<string>('signin')
@@ -29,6 +30,8 @@ export default function AdvancedAuthTabs() {
   // Separate timer refs for alert and redirection
   const alertTimerRef = useRef<NodeJS.Timeout | null>(null)
   const redirectTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const router = useRouter()
 
   // Handler for Sign-Up Password Change
   const handleSignUpPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,10 +203,15 @@ export default function AdvancedAuthTabs() {
 
           if (response.ok) {
             // Handle success (e.g., show success alert, redirect)
-            setAlert({ type: 'success', message: 'Signup successful! Redirecting to sign in...' });
-            setTimeout(() => {
-              setActiveTab('signin');
-            }, 3000); // 3 seconds
+            setAlert({
+              type: 'success',
+              message: 'Signup successful! Redirecting to sign in...'
+            });
+
+            // Redirect to dashboard after 2 seconds
+            redirectTimerRef.current = setTimeout(() => {
+              router.push('/dashboard');
+            }, 2000);
           } else {
             // Handle error from backend API call
             const errorData = await response.json();
@@ -259,9 +267,13 @@ export default function AdvancedAuthTabs() {
         }
 
         // If email is verified, proceed with sign-in
-        setAlert({ type: 'success', message: 'You have successfully signed in!' })
-        // Redirect to Home Page After Successful Sign-In
-        window.location.href = '/'
+        setAlert({ 
+          type: 'success', 
+          message: 'Successfully signed in! Redirecting to dashboard...' 
+        })
+        
+        // Use router.push instead of window.location
+        router.push('/dashboard')
       }
     } catch (error: any) {
       console.error('Signup/Signin process failed:', error)

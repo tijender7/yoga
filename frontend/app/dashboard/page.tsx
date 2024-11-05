@@ -12,6 +12,8 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'  // Import User type
 import ContactFormModal from './form'
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner"
 
 // Add this type definition at the top of your file
 type Subscription = {
@@ -125,6 +127,100 @@ const getInitials = (name: string | undefined | null): string => {
     .join('');
 };
 
+// Add these utility functions at the top of the file
+const formatTimeForTimezone = (hour: number, minute: number, timezone: string) => {
+  const date = new Date();
+  date.setHours(hour, minute, 0); // Set to 6:00 German time
+  
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: timezone,
+    hour12: true
+  }).format(date);
+};
+
+const getSessionTimes = () => {
+  // German time (CET) - 6:00 AM to 7:00 PM
+  const germanStart = formatTimeForTimezone(6, 0, 'Europe/Berlin');
+  const germanEnd = formatTimeForTimezone(19, 0, 'Europe/Berlin');
+  
+  // Convert to Indian time (IST)
+  const indianStart = formatTimeForTimezone(6, 0, 'Asia/Kolkata');
+  const indianEnd = formatTimeForTimezone(19, 0, 'Asia/Kolkata');
+  
+  // Convert to US Eastern time (EST)
+  const usStart = formatTimeForTimezone(6, 0, 'America/New_York');
+  const usEnd = formatTimeForTimezone(19, 0, 'America/New_York');
+
+  return {
+    german: `${germanStart} - ${germanEnd} (CET)`,
+    india: `${indianStart} - ${indianEnd} (IST)`,
+    us: `${usStart} - ${usEnd} (EST)`
+  };
+};
+
+// Update isSessionTime function to handle different timezones
+const isSessionTime = () => {
+  // Get current time in Berlin timezone (base timezone for classes)
+  const now = new Date();
+  const berlinTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+  const day = berlinTime.getDay();
+  const hour = berlinTime.getHours();
+  
+  // Check if it's Monday-Friday (1-5) and between 6 AM and 7 PM Berlin time
+  const isWeekday = day >= 1 && day <= 5;
+  const isWorkingHour = hour >= 6 && hour < 19;
+
+  return isWeekday && isWorkingHour;
+};
+
+// Optional: Add a function to show next available session
+const getNextSession = () => {
+  const now = new Date();
+  const berlinTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
+  const day = berlinTime.getDay();
+  const hour = berlinTime.getHours();
+
+  if (day === 0 || day === 6) {
+    // If weekend, next session is Monday
+    const daysUntilMonday = day === 0 ? 1 : 2;
+    const nextSession = new Date(berlinTime);
+    nextSession.setDate(nextSession.getDate() + daysUntilMonday);
+    nextSession.setHours(6, 0, 0, 0);
+    return nextSession;
+  } else if (hour >= 19) {
+    // If after 7 PM, next session is tomorrow at 6 AM
+    const nextSession = new Date(berlinTime);
+    nextSession.setDate(nextSession.getDate() + 1);
+    nextSession.setHours(6, 0, 0, 0);
+    return nextSession;
+  } else if (hour < 6) {
+    // If before 6 AM, next session is today at 6 AM
+    const nextSession = new Date(berlinTime);
+    nextSession.setHours(6, 0, 0, 0);
+    return nextSession;
+  }
+  
+  return null; // Session is currently active
+};
+
+// Add this to show next session time in the UI
+const NextSessionInfo = () => {
+  const nextSession = getNextSession();
+  if (!nextSession) return null;
+
+  return (
+    <div className="text-sm text-gray-600">
+      Next session starts: {nextSession.toLocaleString('en-US', {
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dateStyle: 'full',
+        timeStyle: 'short'
+      })} (your local time)
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [user, setUser] = useState<User | null>(null)
@@ -218,7 +314,156 @@ export default function Dashboard() {
           </CardHeader>
         </Card>
 
-        {/* Payment History Card with improved styling */}
+        {/* Today's Class Links */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Today's Class Links</CardTitle>
+            <CardDescription>Choose your preferred class mode</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Session Times Display */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+              <h3 className="text-lg font-medium mb-2">Session Timings (Monday to Friday)</h3>
+              <div className="grid gap-2 text-sm">
+                <p>🇩🇪 Germany: {getSessionTimes().german}</p>
+                <p>🇮🇳 India: {getSessionTimes().india}</p>
+                <p>🇺🇸 USA: {getSessionTimes().us}</p>
+              </div>
+              {isSessionTime() ? (
+                <div className="mt-2 text-green-600 font-medium">
+                  ✅ Session is currently active
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <div className="text-red-600 font-medium">
+                    ⏰ Session is currently inactive
+                  </div>
+                  <NextSessionInfo />
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Interactive Mode (Google Meet) */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Interactive Mode</h3>
+                <p className="text-sm text-gray-600 mb-4">Join via Google Meet - Interact with other participants</p>
+                <div className="flex items-center gap-2 mb-4">
+                  <Input 
+                    readOnly 
+                    value="https://meet.google.com/eis-yetd-uqt"
+                    className="bg-gray-50"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      navigator.clipboard.writeText("https://meet.google.com/eis-yetd-uqt");
+                      toast.success("Link copied to clipboard!");
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="default"
+                    onClick={() => window.open("https://meet.google.com/eis-yetd-uqt", "_blank")}
+                    disabled={!isSessionTime()}
+                  >
+                    {isSessionTime() ? "Join Now" : "Session Inactive"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const subject = "Your Interactive Yoga Class Link";
+                      const body = `Here's your Google Meet link for yoga classes:
+
+Link: https://meet.google.com/eis-yetd-uqt
+
+Session Timings:
+Germany: ${getSessionTimes().german}
+India: ${getSessionTimes().india}
+USA: ${getSessionTimes().us}
+
+Sessions are held Monday to Friday.`;
+                      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    }}
+                  >
+                    Email Link
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      toast.success("Class link bookmarked!");
+                    }}
+                  >
+                    Bookmark
+                  </Button>
+                </div>
+              </div>
+
+              {/* Private Mode (Zoom) */}
+              <div className="p-4 border rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Private Mode</h3>
+                <p className="text-sm text-gray-600 mb-4">Join via Zoom - Private session without participant interaction</p>
+                <div className="flex items-center gap-2 mb-4">
+                  <Input 
+                    readOnly 
+                    value="https://us06web.zoom.us/j/89432205986"
+                    className="bg-gray-50"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      navigator.clipboard.writeText("https://us06web.zoom.us/j/89432205986");
+                      toast.success("Link copied to clipboard!");
+                    }}
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="default"
+                    onClick={() => window.open("https://us06web.zoom.us/j/89432205986", "_blank")}
+                    disabled={!isSessionTime()}
+                  >
+                    {isSessionTime() ? "Join Now" : "Session Inactive"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const subject = "Your Private Yoga Class Link";
+                      const body = `Here's your Zoom link for yoga classes:
+
+Link: https://us06web.zoom.us/j/89432205986
+
+Session Timings:
+Germany: ${getSessionTimes().german}
+India: ${getSessionTimes().india}
+USA: ${getSessionTimes().us}
+
+Sessions are held Monday to Friday.`;
+                      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    }}
+                  >
+                    Email Link
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      toast.success("Class link bookmarked!");
+                    }}
+                  >
+                    Bookmark
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment History Card */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">Payment History</CardTitle>
@@ -275,7 +520,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Help Card at bottom */}
+        {/* Help Card */}
         <Card className="mt-auto">
           <CardHeader>
             <CardTitle className="text-xl">Need Help?</CardTitle>

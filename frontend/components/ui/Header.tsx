@@ -81,7 +81,11 @@ export default function Header({ showNavLinks = true }: HeaderProps) {
         )}
         {!loading && !user && (
           <Link href="/auth">
-            <Button variant="outline" size="sm" className="text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs sm:text-sm border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
               Login
             </Button>
           </Link>
