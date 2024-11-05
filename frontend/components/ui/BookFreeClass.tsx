@@ -87,53 +87,64 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         throw new Error(`Error checking email: ${checkError.message}`)
       }
 
-      // Check if user has already booked a free class
-      const { data: existingBooking, error: bookingError } = await supabase
-        .from('user_interactions')
-        .select('id')
-        .eq('email', email)
-        .eq('interest', 'Free Weekend Class')
-        .single()
-
-      if (bookingError && bookingError.code !== 'PGRST116') {
-        throw new Error(`Error checking existing booking: ${bookingError.message}`)
-      }
-
-      if (existingBooking) {
+      if (existingUser) {
         throw new Error("You have already booked a free class. Please check your email for details.")
       }
 
-      let userId = existingUser?.id
-
-      if (!existingUser) {
-        // Create a new user account with email confirmation
-        const { data: newUser, error: signUpError } = await supabase.auth.signUp({
-          email: email,
-          password: Math.random().toString(36).slice(-8), // Generate a random password
-          options: {
-            data: {
-              full_name: name,
-            },
-            emailRedirectTo: `${window.location.origin}/reset-password`
-          }
-        })
-
-        if (signUpError) {
-          throw new Error(`Error creating user: ${signUpError.message}`)
+      // Create a new user account with email confirmation
+      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+        email: email,
+        password: Math.random().toString(36).slice(-8), // Generate a random password
+        options: {
+          data: {
+            full_name: name,
+            phone,
+            healthConditions
+          },
+          emailRedirectTo: `${window.location.origin}/reset-password`
         }
+      })
 
-        userId = newUser?.user?.id
+      if (signUpError) {
+        throw new Error(`Error creating user: ${signUpError.message}`)
+      }
 
-        setNotification({ 
-          type: 'success', 
-          message: "Your account has been created. Please check your email to confirm your account and set your password." 
+      if (!newUser || !newUser.user) {
+        throw new Error('User data not received after signup')
+      }
+
+      // Insert into profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: newUser.user.id,
+          username: email.split('@')[0], // Generate username from email
+          full_name: name,
+          phone: phone ? `${countryCode}${phone}` : null
         })
-      } else {
-        // Existing user, just book the class
-        setNotification({ 
-          type: 'success', 
-          message: "You've successfully booked your free class. Check your email for details." 
-        })
+
+      if (profileError) {
+        throw new Error(`Error creating profile: ${profileError.message}`)
+      }
+
+      // Make API call to backend to create user
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: newUser.user.id,
+          email: email,
+          username: email.split('@')[0],
+          name: name,
+          phone: phone ? `${countryCode}${phone}` : null,
+          healthConditions: healthConditions || null
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user in backend')
       }
 
       // Insert data into user_interactions table
@@ -148,7 +159,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
             health_conditions: healthConditions || null,
             additional_info: additionalInfo || null,
             source: 'get_started',
-            account_created: !existingUser
+            account_created: true
           }
         ])
 
@@ -156,8 +167,13 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         throw new Error(`Error inserting interaction data: ${interactionError.message}`)
       }
 
+      setNotification({ 
+        type: 'success', 
+        message: "Your account has been created. Please check your email to set your password and access your free class details." 
+      })
       setIsDialogOpen(false)
       showConfirmation()
+
     } catch (error: unknown) {
       console.error('Error in handleSubmit:', error)
       if (error instanceof Error) {

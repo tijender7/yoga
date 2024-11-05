@@ -11,6 +11,7 @@ import Header from '@/components/ui/Header'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'  // Import User type
+import ContactFormModal from './form'
 
 // Add this type definition at the top of your file
 type Subscription = {
@@ -114,10 +115,10 @@ async function fetchPaymentHistory(userId: string) {
   return data;
 }
 
-// Add this function to get initials
-const getInitials = (name: string) => {
-  if (!name) return '';
-  return name.split(' ')[0][0].toUpperCase();
+// Improved getInitials function with proper type checking
+const getInitials = (name: string | undefined | null): string => {
+  if (!name) return '?';
+  return name.split(' ')[0].charAt(0).toUpperCase();
 };
 
 export default function Dashboard() {
@@ -189,126 +190,89 @@ export default function Dashboard() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header showNavLinks={true} />
       <main className="container py-6 flex-grow flex flex-col">
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-4">
-              <Avatar className="h-12 w-12">
+        {/* Profile Card with improved UI */}
+        <Card className="w-full mb-6">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 border-2 border-primary/10">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
-                <AvatarFallback>
-                  {userData?.username ? getInitials(userData.username) : '?'}
+                <AvatarFallback className="bg-primary/5 text-lg">
+                  {getInitials(userData?.username)}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col gap-1">
-                <CardTitle>{userData?.username || 'User'}</CardTitle>
-                <CardDescription>{userData?.email}</CardDescription>
+              <div className="flex flex-col">
+                <CardTitle className="text-2xl">{userData?.username || 'User'}</CardTitle>
+                <CardDescription className="text-base">{userData?.email}</CardDescription>
               </div>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Subscription Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {subscriptionData && subscriptionData.length > 0 ? (
-                <>
-                  <p><strong>Status:</strong> {subscriptionData[0].status}</p>
-                  <p><strong>Start Date:</strong> {new Date(subscriptionData[0].start_date).toLocaleDateString()}</p>
-                  <p><strong>End Date:</strong> {new Date(subscriptionData[0].end_date).toLocaleDateString()}</p>
-                  <p><strong>Next Payment Date:</strong> {new Date(subscriptionData[0].next_payment_date).toLocaleDateString()}</p>
-                  <p><strong>Payment Method:</strong> {subscriptionData[0].payment_method}</p>
-                </>
-              ) : (
-                <p>No active subscription found. Would you like to subscribe to a plan?</p>
-              )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              {subscriptionData ? (
-                <>
-                  <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline">Cancel Subscription</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Cancel Subscription</DialogTitle>
-                        <DialogDescription>
-                          Are you sure you want to cancel your subscription? You'll lose access to premium features.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <Button onClick={handleCancelSubscription}>Confirm Cancellation</Button>
-                    </DialogContent>
-                  </Dialog>
-                  <Button onClick={handleUpgradeSubscription}>Upgrade Subscription</Button>
-                </>
-              ) : (
-                <Button onClick={() => router.push('/pricing')}>View Subscription Plans</Button>
-              )}
-            </CardFooter>
-          </Card>
-        </div>
-        <Card className="mt-6">
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Payment History Card with improved styling */}
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Payment History</CardTitle>
+            <CardTitle className="text-xl font-semibold">Payment History</CardTitle>
+            <CardDescription>View all your past transactions</CardDescription>
           </CardHeader>
           <CardContent>
             {paymentHistory && paymentHistory.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentHistory.map((payment: Payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{payment.razorpay_order_id}</TableCell>
-                      <TableCell>
-                        ₹{payment.amount} {payment.currency}
-                      </TableCell>
-                      <TableCell>
-                        <div>{new Date(payment.created_at).toLocaleDateString()}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(payment.created_at).toLocaleTimeString()}
-                        </div>
-                      </TableCell>
-                      <TableCell className="capitalize">
-                        {payment.payment_method}
-                      </TableCell>
-                      <TableCell>
-                        <div className={`
-                          ${payment.status === 'captured' ? 'text-green-600' : ''}
-                          ${payment.status === 'failed' ? 'text-red-600' : ''}
-                          ${payment.status === 'pending' ? 'text-yellow-600' : ''}
-                        `}>
-                          {getFormattedStatus(payment.status)}
-                        </div>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-semibold">Order ID</TableHead>
+                      <TableHead className="font-semibold">Amount</TableHead>
+                      <TableHead className="font-semibold">Date</TableHead>
+                      <TableHead className="font-semibold">Method</TableHead>
+                      <TableHead className="font-semibold">Status</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentHistory.map((payment: Payment) => (
+                      <TableRow key={payment.id}>
+                        <TableCell className="font-medium">{payment.razorpay_order_id}</TableCell>
+                        <TableCell className="font-medium">
+                          ₹{payment.amount} {payment.currency}
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{new Date(payment.created_at).toLocaleDateString()}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(payment.created_at).toLocaleTimeString()}
+                          </div>
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          {payment.payment_method}
+                        </TableCell>
+                        <TableCell>
+                          <div className={`inline-flex px-2 py-1 rounded-full text-sm font-medium
+                            ${payment.status === 'captured' ? 'bg-green-100 text-green-800' : ''}
+                            ${payment.status === 'failed' ? 'bg-red-100 text-red-800' : ''}
+                            ${payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : ''}
+                          `}>
+                            {getFormattedStatus(payment.status)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
-              <p>No payment history available.</p>
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No payment history available.</p>
+              </div>
             )}
           </CardContent>
         </Card>
-        <Card className="mt-auto mb-4">
+
+        {/* Help Card at bottom */}
+        <Card className="mt-auto">
           <CardHeader>
-            <CardTitle>Need Help?</CardTitle>
+            <CardTitle className="text-xl">Need Help?</CardTitle>
+            <CardDescription>We're here to assist you with any questions</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button 
-              variant="outline" 
-              className="w-full flex items-center justify-center"
-              onClick={() => window.location.href = '/contact'}
-            >
-              <HelpCircle className="mr-2 h-4 w-4" /> 
-              Contact Support
-            </Button>
+            <ContactFormModal />
           </CardContent>
         </Card>
       </main>
