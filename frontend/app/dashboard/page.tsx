@@ -15,20 +15,7 @@ import ContactFormModal from './form'
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 
-// Add this type definition at the top of your file
-type Subscription = {
-  id: string;
-  status: string;
-  razorpay_plan_id: string;
-  start_date: string;
-  end_date: string;
-  next_payment_date: string;
-  last_payment_id: string;
-  order_id: string;
-  invoice_id: string;
-  payment_method: string;
-  last_payment_date: string;
-};
+
 
 // Add this type for payments
 type Payment = {
@@ -58,48 +45,9 @@ const getFormattedStatus = (status: string) => {
   return paymentStatusMap[status] || status;
 };
 
-async function fetchSubscriptionData(userId: string) {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select(`
-      id,
-      status,
-      razorpay_plan_id,
-      start_date,
-      end_date,
-      next_payment_date,
-      last_payment_id,
-      order_id,
-      invoice_id,
-      payment_method,
-      last_payment_date
-    `)
- 
-    .not('invoice_id', 'is', null)
-    .order('created_at', { ascending: false })
 
-  if (error) {
-    console.error('Error fetching subscription data:', error)
-    return null
-  }
 
-  return data
-}
 
-async function fetchPlanDetails(razorpayPlanId: string) {
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('name, price, currency')
-    .eq('razorpay_plan_id', razorpayPlanId)
-    .single()
-
-  if (error) {
-    console.error('Error fetching plan details:', error)
-    return null
-  }
-
-  return data
-}
 
 // Add this function to fetch payments
 async function fetchPaymentHistory(userId: string) {
@@ -160,21 +108,6 @@ const getSessionTimes = () => {
   };
 };
 
-// Update isSessionTime function to handle different timezones
-const isSessionTime = () => {
-  // Get current time in Berlin timezone (base timezone for classes)
-  const now = new Date();
-  const berlinTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' }));
-  const day = berlinTime.getDay();
-  const hour = berlinTime.getHours();
-  
-  // Check if it's Monday-Friday (1-5) and between 6 AM and 7 PM Berlin time
-  const isWeekday = day >= 1 && day <= 5;
-  const isWorkingHour = hour >= 6 && hour < 19;
-
-  return isWeekday && isWorkingHour;
-};
-
 // Optional: Add a function to show next available session
 const getNextSession = () => {
   const now = new Date();
@@ -221,10 +154,68 @@ const NextSessionInfo = () => {
   );
 };
 
+// Update the UI part where we show class links
+const ClassLinkSection = ({ title, description, link, meetingType }: {
+  title: string;
+  description: string;
+  link: string;
+  meetingType: "Meet" | "Zoom";
+}) => {
+  return (
+    <div className="p-4 border rounded-lg">
+      <h3 className="text-lg font-medium mb-2">{title}</h3>
+      <p className="text-sm text-gray-600 mb-4">{description}</p>
+      <div className="flex items-center gap-2 mb-4">
+        <Input 
+          readOnly 
+          value={link}
+          className="bg-gray-50"
+        />
+        <Button 
+          variant="outline" 
+          onClick={() => {
+            navigator.clipboard.writeText(link);
+            toast.success("Link copied to clipboard!");
+          }}
+        >
+          Copy
+        </Button>
+      </div>
+      <div className="flex gap-2">
+        <Button 
+          variant="default"
+          onClick={() => window.open(link, "_blank")}
+        >
+          Open {meetingType}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            const subject = `Your ${title} Link`;
+            const body = `Here's your ${meetingType} link for yoga classes:
+
+Link: ${link}
+
+Session Timings:
+Germany: ${getSessionTimes().german}
+India: ${getSessionTimes().india}
+USA: ${getSessionTimes().us}
+
+Sessions are held Monday to Friday.`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          }}
+        >
+          Email Link
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const [showCancelDialog, setShowCancelDialog] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [subscriptionData, setSubscriptionData] = useState<Subscription[] | null>(null)
+  
   const [isLoading, setIsLoading] = useState(true)
   const [paymentHistory, setPaymentHistory] = useState<Payment[] | null>(null);
   const router = useRouter()
@@ -235,8 +226,7 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUser(user)
-        const subData = await fetchSubscriptionData(user.id)
-        setSubscriptionData(subData)
+        
         const payments = await fetchPaymentHistory(user.id)
         setPaymentHistory(payments)
       } else {
@@ -279,17 +269,6 @@ export default function Dashboard() {
     return <div>Please log in to view your dashboard.</div>
   }
 
-  const handleCancelSubscription = () => {
-    // In a real app, you'd implement the cancellation logic here
-    console.log("Subscription cancelled")
-    setShowCancelDialog(false)
-  }
-
-  const handleUpgradeSubscription = () => {
-    // In a real app, you'd implement the upgrade logic here
-    console.log("Navigating to upgrade options")
-  }
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header showNavLinks={true} />
@@ -317,7 +296,7 @@ export default function Dashboard() {
         {/* Today's Class Links */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold">Today's Class Links</CardTitle>
+            <CardTitle className="text-xl font-semibold">Class Links</CardTitle>
             <CardDescription>Choose your preferred class mode</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -329,120 +308,22 @@ export default function Dashboard() {
                 <p>🇮🇳 India: {getSessionTimes().india}</p>
                 <p>🇺🇸 USA: {getSessionTimes().us}</p>
               </div>
-              {isSessionTime() ? (
-                <div className="mt-2 text-green-600 font-medium">
-                  ✅ Session is currently active
-                </div>
-              ) : (
-                <div className="mt-2">
-                  <div className="text-red-600 font-medium">
-                    ⏰ Session is currently inactive
-                  </div>
-                  <NextSessionInfo />
-                </div>
-              )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              {/* Interactive Mode (Google Meet) */}
-              <div className="p-4 border rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Interactive Mode</h3>
-                <p className="text-sm text-gray-600 mb-4">Join via Google Meet - Interact with other participants</p>
-                <div className="flex items-center gap-2 mb-4">
-                  <Input 
-                    readOnly 
-                    value="https://meet.google.com/eis-yetd-uqt"
-                    className="bg-gray-50"
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      navigator.clipboard.writeText("https://meet.google.com/eis-yetd-uqt");
-                      toast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="default"
-                    onClick={() => window.open("https://meet.google.com/eis-yetd-uqt", "_blank")}
-                    disabled={!isSessionTime()}
-                  >
-                    {isSessionTime() ? "Join Now" : "Session Inactive"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const subject = "Your Interactive Yoga Class Link";
-                      const body = `Here's your Google Meet link for yoga classes:
-
-Link: https://meet.google.com/eis-yetd-uqt
-
-Session Timings:
-Germany: ${getSessionTimes().german}
-India: ${getSessionTimes().india}
-USA: ${getSessionTimes().us}
-
-Sessions are held Monday to Friday.`;
-                      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    }}
-                  >
-                    Email Link
-                  </Button>
-                </div>
-              </div>
-
-              {/* Private Mode (Zoom) */}
-              <div className="p-4 border rounded-lg">
-                <h3 className="text-lg font-medium mb-2">Private Mode</h3>
-                <p className="text-sm text-gray-600 mb-4">Join via Zoom - Private session without participant interaction</p>
-                <div className="flex items-center gap-2 mb-4">
-                  <Input 
-                    readOnly 
-                    value="https://us06web.zoom.us/j/89432205986"
-                    className="bg-gray-50"
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      navigator.clipboard.writeText("https://us06web.zoom.us/j/89432205986");
-                      toast.success("Link copied to clipboard!");
-                    }}
-                  >
-                    Copy
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="default"
-                    onClick={() => window.open("https://us06web.zoom.us/j/89432205986", "_blank")}
-                    disabled={!isSessionTime()}
-                  >
-                    {isSessionTime() ? "Join Now" : "Session Inactive"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const subject = "Your Private Yoga Class Link";
-                      const body = `Here's your Zoom link for yoga classes:
-
-Link: https://us06web.zoom.us/j/89432205986
-
-Session Timings:
-Germany: ${getSessionTimes().german}
-India: ${getSessionTimes().india}
-USA: ${getSessionTimes().us}
-
-Sessions are held Monday to Friday.`;
-                      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                    }}
-                  >
-                    Email Link
-                  </Button>
-                </div>
-              </div>
+              <ClassLinkSection 
+                title="Interactive Mode"
+                description="Join via Google Meet - Interact with other participants"
+                link="https://meet.google.com/eis-yetd-uqt"
+                meetingType="Meet"
+              />
+              
+              <ClassLinkSection 
+                title="Private Mode"
+                description="Join via Zoom - Private session without participant interaction"
+                link="https://us06web.zoom.us/j/89432205986"
+                meetingType="Zoom"
+              />
             </div>
           </CardContent>
         </Card>

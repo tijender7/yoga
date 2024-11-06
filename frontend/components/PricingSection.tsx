@@ -3,20 +3,20 @@ import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { handleSubscribeNow } from '@/lib/subscriptionActions'
+import { handlePayment } from '@/lib/paymentActions'
 import RazorpayButton from './RazorpayButton';
 
 
 interface PricingPlan {
   id: number
-  plan_id: string
+  
   region: string
   currency: string
   discounted_price: string
   discount_percentage: number
   strike_through_price: string
   savings: string
-  razorpay_button_id: string  // Add this line
+  razorpay_button_id: string  // Keep this as it's for payment button
 }
 
 const pricingPlans = [
@@ -59,22 +59,23 @@ export default function PricingSection() {
     fetchPricingPlans()
   }, [])
 
-  const handlePayNow = async (planId: string) => {
+  const handlePayNow = async (planId: number) => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
       console.error('User not logged in');
-      // Implement your login logic here
       return;
     }
     
     try {
-      await handleSubscribeNow(user.id, planId, 'monthly', () => {
-        console.log('Subscription successful');
-        // Implement your success logic here
-      });
+      const plan = pricingPlans.find(p => p.id === planId);
+      if (!plan) throw new Error('Plan not found');
+      
+      await handlePayment(
+        parseInt(plan.discounted_price), 
+        plan.currency
+      );
     } catch (error) {
-      console.error('Subscription failed:', error);
-      // Implement your error handling here
+      console.error('Payment failed:', error);
     }
   };
 

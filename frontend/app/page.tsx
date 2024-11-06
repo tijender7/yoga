@@ -18,8 +18,8 @@ import BookFreeClass from '@/components/ui/BookFreeClass';
 import { Toaster } from 'sonner';
 import Header from '@/components/ui/Header';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { fetchYogaPricing } from '@/lib/subscriptionActions';
-import { handleSubscribeNow } from '@/lib/subscriptionActions';
+import { fetchYogaPricing } from '@/lib/paymentActions';
+
 import { supabase } from '@/lib/supabase';
 import { useState, useEffect } from 'react';
 import PricingSection from '@/components/PricingSection'; // New pricing section
