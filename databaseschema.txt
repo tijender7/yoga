@@ -1,0 +1,1177 @@
+all table names
+
+[
+  {
+    "table_name": "payments"
+  },
+  {
+    "table_name": "user_interactions"
+  },
+  {
+    "table_name": "subscriptions"
+  },
+  {
+    "table_name": "contact_messages"
+  },
+  {
+    "table_name": "profiles"
+  },
+  {
+    "table_name": "yoga_classes"
+  },
+  {
+    "table_name": "class_bookings"
+  },
+  {
+    "table_name": "users"
+  },
+  {
+    "table_name": "razorpay_customers"
+  },
+  {
+    "table_name": "yoga_pricing"
+  },
+  {
+    "table_name": "monthly_pricing_fixed"
+  },
+  {
+    "table_name": "subscription_plans_backup"
+  },
+  {
+    "table_name": "subscription_plans"
+  }
+]
+
+
+columns for each table
+
+
+[
+  {
+    "table_name": "class_bookings",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "class_id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "booking_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "message",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": "'pending'::text"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": "nextval('monthly_pricing_fixed_id_seq'::regclass)"
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "region",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "currency",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "discounted_price",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "discount_percentage",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "strike_through_price",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "savings",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "plan_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "razorpay_button_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "payments",
+    "column_name": "razorpay_payment_id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "razorpay_order_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "amount",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "currency",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "payment_method",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "payments",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "payments",
+    "column_name": "contact",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "payments",
+    "column_name": "payment_details",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "username",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "full_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "avatar_url",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "razorpay_customer_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "razorpay_customers",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "razorpay_customers",
+    "column_name": "razorpay_customer_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "razorpay_customers",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "razorpay_plan_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "price",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "currency",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "interval",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "interval_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "id",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "razorpay_plan_id",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "name",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "price",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "currency",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "interval",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "interval_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscription_plans_backup",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "auth.uid()"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "razorpay_plan_id",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "razorpay_subscription_id",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "status",
+    "data_type": "character varying",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "start_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "end_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "total_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "paid_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "remaining_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "cancel_at_period_end",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "canceled_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "pause_collection",
+    "data_type": "json",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "resume_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "last_payment_id",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "last_payment_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "next_payment_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "payment_id",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "order_id",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "invoice_id",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "current_start",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "current_end",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "start_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "end_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "payment_method",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "customer_notify",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "short_url",
+    "data_type": "character varying",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "user_interactions",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "user_interactions",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "user_interactions",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+] 
+
+
+foreign key relationships:
+
+[
+  {
+    "table_schema": "storage",
+    "constraint_name": "objects_bucketId_fkey",
+    "table_name": "objects",
+    "column_name": "bucket_id",
+    "foreign_table_name": "buckets",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "subscriptions_razorpay_plan_id_fkey",
+    "table_name": "subscriptions",
+    "column_name": "razorpay_plan_id",
+    "foreign_table_name": "subscription_plans",
+    "foreign_column_name": "razorpay_plan_id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "class_bookings_class_id_fkey",
+    "table_name": "class_bookings",
+    "column_name": "class_id",
+    "foreign_table_name": "yoga_classes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "saml_relay_states_flow_state_id_fkey",
+    "table_name": "saml_relay_states",
+    "column_name": "flow_state_id",
+    "foreign_table_name": "flow_state",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "saml_relay_states_sso_provider_id_fkey",
+    "table_name": "saml_relay_states",
+    "column_name": "sso_provider_id",
+    "foreign_table_name": "sso_providers",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "refresh_tokens_session_id_fkey",
+    "table_name": "refresh_tokens",
+    "column_name": "session_id",
+    "foreign_table_name": "sessions",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "sessions_user_id_fkey",
+    "table_name": "sessions",
+    "column_name": "user_id",
+    "foreign_table_name": "users",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "sso_domains_sso_provider_id_fkey",
+    "table_name": "sso_domains",
+    "column_name": "sso_provider_id",
+    "foreign_table_name": "sso_providers",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "mfa_amr_claims_session_id_fkey",
+    "table_name": "mfa_amr_claims",
+    "column_name": "session_id",
+    "foreign_table_name": "sessions",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "saml_providers_sso_provider_id_fkey",
+    "table_name": "saml_providers",
+    "column_name": "sso_provider_id",
+    "foreign_table_name": "sso_providers",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "identities_user_id_fkey",
+    "table_name": "identities",
+    "column_name": "user_id",
+    "foreign_table_name": "users",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "one_time_tokens_user_id_fkey",
+    "table_name": "one_time_tokens",
+    "column_name": "user_id",
+    "foreign_table_name": "users",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "mfa_factors_user_id_fkey",
+    "table_name": "mfa_factors",
+    "column_name": "user_id",
+    "foreign_table_name": "users",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "auth",
+    "constraint_name": "mfa_challenges_auth_factor_id_fkey",
+    "table_name": "mfa_challenges",
+    "column_name": "factor_id",
+    "foreign_table_name": "mfa_factors",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "storage",
+    "constraint_name": "s3_multipart_uploads_parts_bucket_id_fkey",
+    "table_name": "s3_multipart_uploads_parts",
+    "column_name": "bucket_id",
+    "foreign_table_name": "buckets",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "storage",
+    "constraint_name": "s3_multipart_uploads_parts_upload_id_fkey",
+    "table_name": "s3_multipart_uploads_parts",
+    "column_name": "upload_id",
+    "foreign_table_name": "s3_multipart_uploads",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "storage",
+    "constraint_name": "s3_multipart_uploads_bucket_id_fkey",
+    "table_name": "s3_multipart_uploads",
+    "column_name": "bucket_id",
+    "foreign_table_name": "buckets",
+    "foreign_column_name": "id"
+  }
+]
+
+
+
+Get primary keys:
+
+[
+  {
+    "table_name": "payments",
+    "column_name": "id"
+  },
+  {
+    "table_name": "user_interactions",
+    "column_name": "id"
+  },
+  {
+    "table_name": "objects",
+    "column_name": "id"
+  },
+  {
+    "table_name": "migrations",
+    "column_name": "id"
+  },
+  {
+    "table_name": "key",
+    "column_name": "id"
+  },
+  {
+    "table_name": "secrets",
+    "column_name": "id"
+  },
+  {
+    "table_name": "schema_migrations",
+    "column_name": "version"
+  },
+  {
+    "table_name": "schema_migrations",
+    "column_name": "version"
+  },
+  {
+    "table_name": "messages",
+    "column_name": "id"
+  },
+  {
+    "table_name": "subscription",
+    "column_name": "id"
+  },
+  {
+    "table_name": "contact_messages",
+    "column_name": "id"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "id"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id"
+  },
+  {
+    "table_name": "class_bookings",
+    "column_name": "id"
+  },
+  {
+    "table_name": "yoga_classes",
+    "column_name": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id"
+  },
+  {
+    "table_name": "razorpay_customers",
+    "column_name": "id"
+  },
+  {
+    "table_name": "yoga_pricing",
+    "column_name": "id"
+  },
+  {
+    "table_name": "monthly_pricing_fixed",
+    "column_name": "id"
+  },
+  {
+    "table_name": "subscription_plans",
+    "column_name": "id"
+  },
+  {
+    "table_name": "schema_migrations",
+    "column_name": "version"
+  },
+  {
+    "table_name": "schema_migrations",
+    "column_name": "version"
+  },
+  {
+    "table_name": "instances",
+    "column_name": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id"
+  },
+  {
+    "table_name": "users",
+    "column_name": "id"
+  },
+  {
+    "table_name": "audit_log_entries",
+    "column_name": "id"
+  },
+  {
+    "table_name": "saml_relay_states",
+    "column_name": "id"
+  },
+  {
+    "table_name": "refresh_tokens",
+    "column_name": "id"
+  },
+  {
+    "table_name": "sessions",
+    "column_name": "id"
+  },
+  {
+    "table_name": "sso_providers",
+    "column_name": "id"
+  },
+  {
+    "table_name": "sso_domains",
+    "column_name": "id"
+  },
+  {
+    "table_name": "mfa_amr_claims",
+    "column_name": "id"
+  },
+  {
+    "table_name": "saml_providers",
+    "column_name": "id"
+  },
+  {
+    "table_name": "flow_state",
+    "column_name": "id"
+  },
+  {
+    "table_name": "identities",
+    "column_name": "id"
+  },
+  {
+    "table_name": "one_time_tokens",
+    "column_name": "id"
+  },
+  {
+    "table_name": "mfa_factors",
+    "column_name": "id"
+  },
+  {
+    "table_name": "mfa_challenges",
+    "column_name": "id"
+  },
+  {
+    "table_name": "buckets",
+    "column_name": "id"
+  },
+  {
+    "table_name": "s3_multipart_uploads_parts",
+    "column_name": "id"
+  },
+  {
+    "table_name": "s3_multipart_uploads",
+    "column_name": "id"
+  }
+]
+
+Get indexes:
+[
+  {
+    "tablename": "class_bookings",
+    "indexname": "class_bookings_pkey",
+    "indexdef": "CREATE UNIQUE INDEX class_bookings_pkey ON public.class_bookings USING btree (id)"
+  },
+  {
+    "tablename": "contact_messages",
+    "indexname": "contact_messages_pkey",
+    "indexdef": "CREATE UNIQUE INDEX contact_messages_pkey ON public.contact_messages USING btree (id)"
+  },
+  {
+    "tablename": "monthly_pricing_fixed",
+    "indexname": "monthly_pricing_fixed_pkey",
+    "indexdef": "CREATE UNIQUE INDEX monthly_pricing_fixed_pkey ON public.monthly_pricing_fixed USING btree (id)"
+  },
+  {
+    "tablename": "monthly_pricing_fixed",
+    "indexname": "monthly_pricing_fixed_plan_id_key",
+    "indexdef": "CREATE UNIQUE INDEX monthly_pricing_fixed_plan_id_key ON public.monthly_pricing_fixed USING btree (plan_id)"
+  },
+  {
+    "tablename": "payments",
+    "indexname": "idx_payments_contact",
+    "indexdef": "CREATE INDEX idx_payments_contact ON public.payments USING btree (contact)"
+  },
+  {
+    "tablename": "payments",
+    "indexname": "idx_payments_email",
+    "indexdef": "CREATE INDEX idx_payments_email ON public.payments USING btree (email)"
+  },
+  {
+    "tablename": "payments",
+    "indexname": "idx_payments_razorpay_payment_id",
+    "indexdef": "CREATE INDEX idx_payments_razorpay_payment_id ON public.payments USING btree (razorpay_payment_id)"
+  },
+  {
+    "tablename": "payments",
+    "indexname": "payments_pkey",
+    "indexdef": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)"
+  },
+  {
+    "tablename": "payments",
+    "indexname": "payments_razorpay_payment_id_key",
+    "indexdef": "CREATE UNIQUE INDEX payments_razorpay_payment_id_key ON public.payments USING btree (razorpay_payment_id)"
+  },
+  {
+    "tablename": "profiles",
+    "indexname": "profiles_pkey",
+    "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+  },
+  {
+    "tablename": "profiles",
+    "indexname": "profiles_username_key",
+    "indexdef": "CREATE UNIQUE INDEX profiles_username_key ON public.profiles USING btree (username)"
+  },
+  {
+    "tablename": "razorpay_customers",
+    "indexname": "razorpay_customers_pkey",
+    "indexdef": "CREATE UNIQUE INDEX razorpay_customers_pkey ON public.razorpay_customers USING btree (id)"
+  },
+  {
+    "tablename": "razorpay_customers",
+    "indexname": "razorpay_customers_razorpay_customer_id_key",
+    "indexdef": "CREATE UNIQUE INDEX razorpay_customers_razorpay_customer_id_key ON public.razorpay_customers USING btree (razorpay_customer_id)"
+  },
+  {
+    "tablename": "subscription_plans",
+    "indexname": "subscription_plans_pkey",
+    "indexdef": "CREATE UNIQUE INDEX subscription_plans_pkey ON public.subscription_plans USING btree (id)"
+  },
+  {
+    "tablename": "subscription_plans",
+    "indexname": "unique_razorpay_plan_id",
+    "indexdef": "CREATE UNIQUE INDEX unique_razorpay_plan_id ON public.subscription_plans USING btree (razorpay_plan_id)"
+  },
+  {
+    "tablename": "subscriptions",
+    "indexname": "subscriptions_pkey",
+    "indexdef": "CREATE UNIQUE INDEX subscriptions_pkey ON public.subscriptions USING btree (id)"
+  },
+  {
+    "tablename": "user_interactions",
+    "indexname": "user_interactions_pkey",
+    "indexdef": "CREATE UNIQUE INDEX user_interactions_pkey ON public.user_interactions USING btree (id)"
+  },
+  {
+    "tablename": "users",
+    "indexname": "users_email_key",
+    "indexdef": "CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)"
+  },
+  {
+    "tablename": "users",
+    "indexname": "users_pkey",
+    "indexdef": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+  },
+  {
+    "tablename": "yoga_classes",
+    "indexname": "yoga_classes_pkey",
+    "indexdef": "CREATE UNIQUE INDEX yoga_classes_pkey ON public.yoga_classes USING btree (id)"
+  },
+  {
+    "tablename": "yoga_pricing",
+    "indexname": "yoga_pricing_pkey",
+    "indexdef": "CREATE UNIQUE INDEX yoga_pricing_pkey ON public.yoga_pricing USING btree (id)"
+  }
+]
+

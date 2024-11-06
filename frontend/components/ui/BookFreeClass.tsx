@@ -94,7 +94,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
       // Create a new user account with email confirmation
       const { data: newUser, error: signUpError } = await supabase.auth.signUp({
         email: email,
-        password: Math.random().toString(36).slice(-8), // Generate a random password
+        password: Math.random().toString(36).slice(-8),
         options: {
           data: {
             full_name: name,
@@ -113,21 +113,7 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         throw new Error('User data not received after signup')
       }
 
-      // Insert into profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: newUser.user.id,
-          username: name.toLowerCase().replace(/\s+/g, '_'), // Convert name to lowercase and replace spaces with underscore
-          full_name: name,
-          phone: phone ? `${countryCode}${phone}` : null
-        })
-
-      if (profileError) {
-        throw new Error(`Error creating profile: ${profileError.message}`)
-      }
-
-      // Make API call to backend to create user
+      // Call backend API to create user
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {
         method: 'POST',
         headers: {
@@ -136,35 +122,14 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
         body: JSON.stringify({
           userId: newUser.user.id,
           email: email,
-          username: name.toLowerCase().replace(/\s+/g, '_'), // Same username format
           name: name,
           phone: phone ? `${countryCode}${phone}` : null,
-          healthConditions: healthConditions || null
+          healthConditions: healthConditions || ''
         }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to create user in backend')
-      }
-
-      // Insert data into user_interactions table
-      const { error: interactionError } = await supabase
-        .from('user_interactions')
-        .insert([
-          { 
-            email,
-            name, 
-            phone_number: phone ? `${countryCode}${phone}` : null,
-            interest: 'Free Weekend Class',
-            health_conditions: healthConditions || null,
-            additional_info: additionalInfo || null,
-            source: 'get_started',
-            account_created: true
-          }
-        ])
-
-      if (interactionError) {
-        throw new Error(`Error inserting interaction data: ${interactionError.message}`)
       }
 
       setNotification({ 

@@ -66,19 +66,43 @@ export default function StickyJoinForm() {
         return;
       }
 
-      // Insert into user_interactions table
-      const { data, error } = await supabase
-        .from('user_interactions')
-        .insert([
-          {
-            email,
-            name,
-            interest,
-            source: 'sticky_header',
-          }
-        ]);
+      // Replace the existing user_interactions insert with:
+      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
+        email: email,
+        password: Math.random().toString(36).slice(-8),
+        options: {
+          data: {
+            full_name: name,
+            interest
+          },
+          emailRedirectTo: `${window.location.origin}/reset-password`
+        }
+      });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      if (!newUser || !newUser.user) {
+        throw new Error('User data not received after signup');
+      }
+
+      // Call backend API to create user
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: newUser.user.id,
+          email: email,
+          name: name,
+          interest: interest,
+          source: 'sticky_header'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user in backend');
+      }
 
       toast.success('Thank you for joining! We\'ll be in touch soon.');
       setName('');

@@ -13,9 +13,9 @@ async def create_payment_link(amount: int, currency: str = 'INR', description: s
             "accept_partial": False,
             "description": description,
             "callback_url": RAZORPAY_CALLBACK_URL,
-            "callback_method": "get"
+            "callback_method": "post"
         })
         return payment_link['short_url']
     except Exception as e:
-        logger.error("Payment link creation failed")
+        logger.error(f"Payment link creation failed: {str(e)}")
         raise
