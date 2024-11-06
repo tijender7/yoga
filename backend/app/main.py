@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from app.services.razorpay_service import create_payment_link
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-from app.config import IS_DEVELOPMENT, PAYMENT_STATUS_MAP, RAZORPAY_CALLBACK_URL
+from app.config import FRONTEND_URL, IS_DEVELOPMENT, PAYMENT_STATUS_MAP, RAZORPAY_CALLBACK_URL
 from datetime import datetime
 from app.services.supabase_service import supabase
 from fastapi.responses import JSONResponse
@@ -10,6 +10,7 @@ from typing import Dict, Any
 from pydantic import BaseModel, Field
 from typing import Optional
 from pydantic import EmailStr
+import secrets
 
 app = FastAPI()
 
@@ -58,7 +59,10 @@ class UserCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     healthConditions: Optional[str] = None
-    userId: Optional[str] = None  # Add this field to receive auth.user.id
+    userId: Optional[str] = None
+    username: Optional[str] = None
+    interest: Optional[str] = None
+    source: Optional[str] = None
 
 @app.post("/api/create-payment")
 async def create_payment_endpoint(payment_data: dict):
@@ -212,4 +216,46 @@ async def create_user(user: UserCreate):
 
     except Exception as e:
         logger.error(f"Error creating user: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/auth/signup")
+async def create_auth_user(user_data: dict):
+    try:
+        # Create auth user
+        auth_response = supabase.auth.sign_up({
+            "email": user_data["email"],
+            "password": user_data.get("password") or secrets.token_urlsafe(8),
+            "options": {
+                "data": {
+                    "full_name": user_data["name"],
+                    "phone": user_data.get("phone"),
+                    "healthConditions": user_data.get("healthConditions"),
+                    "interest": user_data.get("interest")
+                },
+                "email_redirect_to": f"{FRONTEND_URL}/reset-password"
+            }
+        })
+
+        if not auth_response.user:
+            raise HTTPException(status_code=400, detail="Failed to create auth user")
+
+        # Create user in database tables
+        await create_user(UserCreate(
+            userId=auth_response.user.id,
+            email=user_data["email"],
+            name=user_data["name"],  # Make sure name is passed
+            phone=user_data.get("phone"),
+            healthConditions=user_data.get("healthConditions"),
+            interest=user_data.get("interest"),
+            source=user_data.get("source", "get_started")
+        ))
+
+        return {
+            "status": "success",
+            "userId": auth_response.user.id,
+            "message": "User created successfully"
+        }
+
+    except Exception as e:
+        logger.error(f"Error creating auth user: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -64,3 +64,6 @@ PAYMENT_STATUS_MAP = {
     'failed': 'failed',
     'refunded': 'refunded'
 }
+
+# Add FRONTEND_URL to our config
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')

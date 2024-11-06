@@ -12,23 +12,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, email, phone, healthConditions } = body;
 
-    // Create user with Supabase auth
-    const { data: authUser, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password: Math.random().toString(36).slice(-8),
-      options: {
-        data: {
-          name,
-          phone,
-          healthConditions
-        }
-      }
-    });
-
-    if (signUpError) throw signUpError;
-
     // Call backend API to create user
-    const backendResponse = await fetch(`${API_BASE_URL}/api/create-user`, {
+    const backendResponse = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +23,7 @@ export async function POST(request: Request) {
         email,
         phone,
         healthConditions,
-        userId: authUser.user?.id
+        source: 'free_class'
       })
     });
 

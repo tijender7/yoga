@@ -142,83 +142,51 @@ export default function AdvancedAuthTabs() {
 
     try {
       if (activeTab === 'signup') {
-        // Step 1: Check if Username is Unique by Querying the Profiles Table
+        // Step 1: Check if Username is Unique
         const { data: existingUsername, error: usernameError } = await supabase
           .from('profiles')
           .select('id')
           .eq('username', username)
           .maybeSingle()
 
-        if (usernameError && usernameError.code !== 'PGRST116') { // PGRST116: No rows found
+        if (usernameError && usernameError.code !== 'PGRST116') {
           throw usernameError
         }
 
         if (existingUsername) {
-          // Username is Already Taken
           setFormErrors({ username: 'Username is already taken.' })
           setIsLoading(false)
           return
         }
 
-        // Step 2: Attempt to Sign Up
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-        })
-        if (error) throw error
+        // Step 2: Call backend signup endpoint
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            name: username,
+            username
+          }),
+        });
 
-        if (!data.user) {
-          throw new Error('User data not received after signup')
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to create user');
         }
 
-        // Step 3: Insert into Profiles Table
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            username: username,
-          })
+        setAlert({
+          type: 'success',
+          message: 'Signup successful! Please check your email to verify your account.'
+        });
 
-        if (profileError) {
-          // Handle Profile Creation Error
-          // IMPORTANT: Avoid deleting the user from the client-side.
-          // Instead, inform the user to contact support or implement server-side cleanup.
-          throw new Error('Profile creation failed. Please contact support.')
-        }
-
-        // Step 4: After successful signup, make API call to backend
-        if (data && data.user) {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {// Adjust API endpoint as needed
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              userId: data.user.id,
-              email: email,
-              username: username, 
-              // Add other user data as needed
-            }),
-          });
-
-          if (response.ok) {
-            // Handle success (e.g., show success alert, redirect)
-            setAlert({
-              type: 'success',
-              message: 'Signup successful! Redirecting to sign in...'
-            });
-
-            // Redirect to dashboard after 2 seconds
-            redirectTimerRef.current = setTimeout(() => {
-              router.push('/dashboard');
-            }, 2000);
-          } else {
-            // Handle error from backend API call
-            const errorData = await response.json();
-            console.error('Backend API error:', errorData);
-            setAlert({ type: 'error', message: errorData.message || 'An error occurred during signup.' });
-          }
-        }
+        // Redirect to signin after 2 seconds
+        redirectTimerRef.current = setTimeout(() => {
+          router.push('/signin');
+        }, 2000);
       } else if (activeTab === 'signin') {
         // Sign-In Logic
         const { data, error } = await supabase.auth.signInWithPassword({ email, password })

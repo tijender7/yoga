@@ -92,40 +92,16 @@ export default function BookFreeClass({ buttonText = "Book Your Free Class", isO
       }
 
       // Create a new user account with email confirmation
-      const { data: newUser, error: signUpError } = await supabase.auth.signUp({
-        email: email,
-        password: Math.random().toString(36).slice(-8),
-        options: {
-          data: {
-            full_name: name,
-            phone,
-            healthConditions
-          },
-          emailRedirectTo: `${window.location.origin}/reset-password`
-        }
-      })
-
-      if (signUpError) {
-        throw new Error(`Error creating user: ${signUpError.message}`)
-      }
-
-      if (!newUser || !newUser.user) {
-        throw new Error('User data not received after signup')
-      }
-
-      // Call backend API to create user
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create-user`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/signup`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: newUser.user.id,
-          email: email,
-          name: name,
+          email,
+          name,
           phone: phone ? `${countryCode}${phone}` : null,
-          healthConditions: healthConditions || ''
-        }),
+          healthConditions,
+          source: 'get_started'
+        })
       });
 
       if (!response.ok) {
