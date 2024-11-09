@@ -14,6 +14,7 @@ import { User } from '@supabase/supabase-js'  // Import User type
 import ContactFormModal from './form'
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import PricingSection from '@/components/PricingSection'
 
 
 
@@ -350,9 +351,10 @@ export default function Dashboard() {
                   <TableBody>
                     {paymentHistory.map((payment: Payment) => (
                       <TableRow key={payment.id}>
-                        <TableCell className="font-medium">{payment.razorpay_order_id}</TableCell>
+                        <TableCell className="font-medium">{payment.order_id}</TableCell>
                         <TableCell className="font-medium">
-                          ₹{payment.amount} {payment.currency}
+                          {payment.currency === 'INR' ? '₹' : payment.currency === 'USD' ? '$' : '€'}
+                          {payment.amount} {payment.currency}
                         </TableCell>
                         <TableCell>
                           <div className="font-medium">{new Date(payment.created_at).toLocaleDateString()}</div>
@@ -378,8 +380,27 @@ export default function Dashboard() {
                 </Table>
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No payment history available.</p>
+              <div className="text-center py-8 space-y-4">
+                <div className="bg-primary/5 p-6 rounded-lg border border-primary/10">
+                  <h3 className="text-2xl font-semibold text-primary mb-4">
+                    🎉 Start Your Yoga Journey Today!
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="bg-white/50 p-4 rounded-lg">
+                      <p className="text-lg font-medium text-gray-800">
+                        Try 3 Free Trial Classes
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Experience our transformative yoga sessions before committing
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Add PricingSection component here */}
+                <div className="mt-8">
+                  <PricingSection />
+                </div>
               </div>
             )}
           </CardContent>

@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 
 interface RazorpayButtonProps {
   buttonId: string;
+  userId?: string;
 }
 
-const RazorpayButton: React.FC<RazorpayButtonProps> = ({ buttonId }) => {
+const RazorpayButton: React.FC<RazorpayButtonProps> = ({ buttonId, userId }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -12,6 +13,9 @@ const RazorpayButton: React.FC<RazorpayButtonProps> = ({ buttonId }) => {
     script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
     script.async = true;
     script.dataset.payment_button_id = buttonId;
+    if (userId) {
+      script.dataset.user_id = userId;
+    }
     
     if (formRef.current) {
       formRef.current.appendChild(script);
@@ -22,7 +26,7 @@ const RazorpayButton: React.FC<RazorpayButtonProps> = ({ buttonId }) => {
         formRef.current.removeChild(script);
       }
     };
-  }, [buttonId]);
+  }, [buttonId, userId]);
 
   return <form ref={formRef}></form>;
 };

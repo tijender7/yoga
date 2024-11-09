@@ -67,3 +67,22 @@ PAYMENT_STATUS_MAP = {
 
 # Add FRONTEND_URL to our config
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
+# Currency configuration
+CURRENCY_CONFIGS = {
+    'INR': {
+        'symbol': '₹',
+        'decimal_places': 2,
+        'min_amount': 100,  # 1 INR in paise
+    },
+    'USD': {
+        'symbol': '$',
+        'decimal_places': 2,
+        'min_amount': 50,   # 0.50 USD in cents
+    },
+    'EUR': {
+        'symbol': '€',
+        'decimal_places': 2,
+        'min_amount': 50,   # 0.50 EUR in cents
+    }
+}

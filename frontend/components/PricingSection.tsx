@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { handlePayment } from '@/lib/paymentActions'
 import RazorpayButton from './RazorpayButton';
-
+import { User } from '@supabase/supabase-js'
 
 interface PricingPlan {
   id: number
@@ -42,6 +42,7 @@ const pricingPlans = [
 
 export default function PricingSection() {
   const [pricingPlans, setPricingPlans] = useState<PricingPlan[]>([])
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     async function fetchPricingPlans() {
@@ -59,6 +60,25 @@ export default function PricingSection() {
     fetchPricingPlans()
   }, [])
 
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    const storeUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.id) {
+        // Store user ID in localStorage for payment tracking
+        localStorage.setItem('current_user_id', user.id);
+      }
+    };
+    storeUserId();
+  }, []);
+
   const handlePayNow = async (planId: number) => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) {
@@ -72,7 +92,8 @@ export default function PricingSection() {
       
       await handlePayment(
         parseInt(plan.discounted_price), 
-        plan.currency
+        plan.currency,
+        user.id  // Pass user ID here
       );
     } catch (error) {
       console.error('Payment failed:', error);
@@ -135,7 +156,9 @@ export default function PricingSection() {
               </CardContent>
               <CardFooter className="flex justify-center items-center">
                 <div className="w-full max-w-[200px]">
-                  <RazorpayButton buttonId={plan.razorpay_button_id} />
+                  <RazorpayButton 
+                    buttonId={plan.razorpay_button_id}
+                  />
                 </div>
               </CardFooter>
             </Card>
