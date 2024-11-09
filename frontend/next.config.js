@@ -6,6 +6,11 @@ const nextConfig = {
     async redirects() {
       return [
         {
+          source: '/terms-of-service',
+          destination: '/terms',
+          permanent: true,
+        },
+        {
           source: '/test-redirect',
           destination: '/auth',
           permanent: false,

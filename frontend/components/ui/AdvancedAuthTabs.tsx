@@ -12,6 +12,7 @@ import { Eye, EyeOff, AlertCircle, Check, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { AuthError } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import TermsModal from '@/components/legal/TermsModal'
 
 export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
   const [activeTab, setActiveTab] = useState<string>(defaultTab)
@@ -26,6 +27,7 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
   const [signUpConfirmPassword, setSignUpConfirmPassword] = useState('')
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
   const [isPasswordEmpty, setIsPasswordEmpty] = useState(true)
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
   
   // Separate timer refs for alert and redirection
   const alertTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -609,14 +611,18 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
                 aria-invalid={!!formErrors.terms}
                 aria-describedby={formErrors.terms ? 'signup-terms-error' : undefined}
               />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                I agree to the <a href="#" className="text-primary hover:underline">Terms of Service</a>
+              <label htmlFor="terms" className="text-sm font-medium text-gray-700 leading-none">
+                I agree to the{" "}
+                <button 
+                  type="button"
+                  onClick={() => setIsTermsModalOpen(true)}
+                  className="text-primary hover:underline"
+                >
+                  Terms of Service
+                </button>
               </label>
               {formErrors.terms && (
-                <p id="signup-terms-error" className="text-red-500 text-xs absolute -bottom-5 left-0">
+                <p id="signup-terms-error" className="text-red-500 text-xs absolute -bottom-5">
                   {formErrors.terms}
                 </p>
               )}
@@ -738,6 +744,10 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
           </div>
         </Alert>
       )}
+      <TermsModal 
+        open={isTermsModalOpen} 
+        onClose={() => setIsTermsModalOpen(false)} 
+      />
     </div>
   )
 }
