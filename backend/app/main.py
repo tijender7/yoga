@@ -221,7 +221,17 @@ async def create_user(user: UserCreate):
 @app.post("/api/auth/signup")
 async def create_auth_user(user_data: dict):
     try:
-        # Create auth user
+        source = user_data.get("source", "signup")
+        
+        # Choose template and redirect URL based on source
+        if source in ["free_class", "sticky_header", "get_started"]:
+            email_template = "reset_password"  # Matches exactly with Supabase template name
+            redirect_to = f"{FRONTEND_URL}/reset-password"
+        else:
+            email_template = "confirm_signup"  # Matches exactly with Supabase template name
+            redirect_to = f"{FRONTEND_URL}/auth"
+        
+        # Create auth user with correct template parameter
         auth_response = supabase.auth.sign_up({
             "email": user_data["email"],
             "password": user_data.get("password") or secrets.token_urlsafe(8),
@@ -230,9 +240,11 @@ async def create_auth_user(user_data: dict):
                     "full_name": user_data["name"],
                     "phone": user_data.get("phone"),
                     "healthConditions": user_data.get("healthConditions"),
-                    "interest": user_data.get("interest")
+                    "interest": user_data.get("interest"),
+                    "source": source
                 },
-                "email_redirect_to": f"{FRONTEND_URL}/reset-password"
+                "email_redirect_to": redirect_to,
+                "email_template": email_template  # Changed back to email_template
             }
         })
 
@@ -243,11 +255,11 @@ async def create_auth_user(user_data: dict):
         await create_user(UserCreate(
             userId=auth_response.user.id,
             email=user_data["email"],
-            name=user_data["name"],  # Make sure name is passed
+            name=user_data["name"],
             phone=user_data.get("phone"),
             healthConditions=user_data.get("healthConditions"),
             interest=user_data.get("interest"),
-            source=user_data.get("source", "get_started")
+            source=source
         ))
 
         return {
