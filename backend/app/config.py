@@ -14,18 +14,22 @@ logging.getLogger('app.services').setLevel(logging.INFO)
 # Load environment variables from .env
 load_dotenv()
 
-# PayPal Credentials
-PAYPAL_API_BASE = os.getenv("PAYPAL_API_BASE", "https://api-m.sandbox.paypal.com")
-PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
-PAYPAL_SECRET  = os.getenv("PAYPAL_CLIENT_SECRET")
+
+
 # config.py mein ya main file ke top par
-ENVIRONMENT = os.getenv('ENVIRONMENT', 'production').lower()
-IS_DEVELOPMENT = ENVIRONMENT == 'development'
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'production')
+DEBUG = ENVIRONMENT == 'development'
 
 print(f"ENVIRONMENT: {ENVIRONMENT}")  # Debug ke liye
-print(f"IS_DEVELOPMENT: {IS_DEVELOPMENT}")  # Debug ke liye
+print(f"IS_DEVELOPMENT: {DEBUG}")  # Debug ke liye
 
-API_BASE_URL = 'http://localhost:8000'
+logging.basicConfig(
+    level=logging.INFO if not DEBUG else logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='production.log' if not DEBUG else None
+)
+
+API_BASE_URL = os.getenv('API_BASE_URL', 'http://localhost:8000')
 NGROK_URL = os.getenv("NGROK_URL")
 if not NGROK_URL:
     raise ValueError("NGROK_URL must be set in the environment variables")

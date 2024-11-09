@@ -11,22 +11,22 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from pydantic import EmailStr
 import secrets
+import os
 
 app = FastAPI()
 
 # CORS configuration
 origins = [
-    "http://localhost:3000",  # Frontend URL
-    "https://api.razorpay.com",  # Add your frontend URL
-    "*ngrok-free.app",  # Allow ngrok URLs
-    "https://checkout.razorpay.com"  # Add this
+    os.getenv('FRONTEND_URL', 'http://localhost:3000'),
+    "https://api.razorpay.com",
+    "https://checkout.razorpay.com"
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST", "GET"],
     allow_headers=["*"],
 )
 
