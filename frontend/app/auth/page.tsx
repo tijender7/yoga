@@ -1,8 +1,12 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import AdvancedAuthTabs from '@/components/ui/AdvancedAuthTabs'
 
 export default function AuthPage() {
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get('tab') || 'signin'
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -11,7 +15,7 @@ export default function AuthPage() {
             Welcome to YogForever
           </h2>
         </div>
-        <AdvancedAuthTabs />
+        <AdvancedAuthTabs defaultTab={defaultTab} />
       </div>
     </div>
   )

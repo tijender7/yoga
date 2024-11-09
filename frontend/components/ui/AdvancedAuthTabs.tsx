@@ -13,8 +13,8 @@ import { supabase } from '@/lib/supabase'
 import { AuthError } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
-export default function AdvancedAuthTabs() {
-  const [activeTab, setActiveTab] = useState<string>('signin')
+export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
+  const [activeTab, setActiveTab] = useState<string>(defaultTab)
   const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
@@ -32,6 +32,17 @@ export default function AdvancedAuthTabs() {
   const redirectTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const router = useRouter()
+
+  // Add this useEffect to handle tab changes
+  useEffect(() => {
+    setActiveTab(defaultTab)
+  }, [defaultTab])
+
+  // Add this function to handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    router.push(`/auth?tab=${value}`, { scroll: false })
+  }
 
   // Handler for Sign-Up Password Change
   const handleSignUpPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,9 +194,9 @@ export default function AdvancedAuthTabs() {
           message: 'Signup successful! Please check your email to verify your account.'
         });
 
-        // Redirect to signin after 2 seconds
+        // Redirect to auth page with signin tab after 2 seconds
         redirectTimerRef.current = setTimeout(() => {
-          router.push('/signin');
+          router.push('/auth?tab=signin');
         }, 2000);
       } else if (activeTab === 'signin') {
         // Sign-In Logic
@@ -362,7 +373,7 @@ export default function AdvancedAuthTabs() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6 bg-white p-8 rounded-lg shadow-md">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent">
           <TabsTrigger 
             value="signin" 
