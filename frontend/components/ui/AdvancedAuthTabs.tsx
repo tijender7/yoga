@@ -191,7 +191,7 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
 
         setAlert({
           type: 'success',
-          message: 'Signup successful! Please check your email to verify your account.'
+          message: '🎉 Account created successfully! Please check your email inbox to verify your account. You will be redirected shortly.'
         });
 
         // Redirect to auth page with signin tab after 2 seconds
@@ -702,20 +702,40 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
       {alert && (
         <Alert 
           variant={alert.type === 'error' ? 'destructive' : 'default'} 
-          className="mt-4" 
+          className={`mt-4 ${
+            alert.type === 'success' ? 'bg-green-50 border-green-200' : 
+            alert.type === 'error' ? 'bg-red-50 border-red-200' : 
+            'bg-blue-50 border-blue-200'
+          }`}
           role="alert"
         >
-          {alert.type === 'error' ? (
-            <AlertCircle className="h-4 w-4 text-red-500" />
-          ) : alert.type === 'success' ? (
-            <Check className="h-4 w-4 text-green-500" />
-          ) : (
-            <AlertCircle className="h-4 w-4 text-[#4285F4]" />
-          )}
-          <AlertTitle className="text-gray-900 font-semibold">
-            {alert.type === 'error' ? 'Error' : alert.type === 'success' ? 'Success' : 'Info'}
-          </AlertTitle>
-          <AlertDescription className="text-gray-700">{alert.message}</AlertDescription>
+          <div className="flex items-center gap-2">
+            {alert.type === 'error' ? (
+              <AlertCircle className="h-5 w-5 text-red-500" />
+            ) : alert.type === 'success' ? (
+              <Check className="h-5 w-5 text-green-500" />
+            ) : (
+              <AlertCircle className="h-5 w-5 text-blue-500" />
+            )}
+            <div>
+              <AlertTitle className={`font-semibold ${
+                alert.type === 'success' ? 'text-green-800' : 
+                alert.type === 'error' ? 'text-red-800' : 
+                'text-blue-800'
+              }`}>
+                {alert.type === 'success' ? 'Success!' : 
+                 alert.type === 'error' ? 'Error!' : 
+                 'Info'}
+              </AlertTitle>
+              <AlertDescription className={`mt-1 text-sm ${
+                alert.type === 'success' ? 'text-green-700' : 
+                alert.type === 'error' ? 'text-red-700' : 
+                'text-blue-700'
+              }`}>
+                {alert.message}
+              </AlertDescription>
+            </div>
+          </div>
         </Alert>
       )}
     </div>
