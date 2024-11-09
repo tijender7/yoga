@@ -15,6 +15,7 @@ import ContactFormModal from './form'
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import PricingSection from '@/components/PricingSection'
+import { getCurrencySymbol } from '@/lib/utils'
 
 
 
@@ -22,7 +23,7 @@ import PricingSection from '@/components/PricingSection'
 type Payment = {
   id: string;
   razorpay_payment_id: string;
-  razorpay_order_id: string;
+  order_id: string;
   status: string;
   amount: number;
   currency: string;
@@ -30,6 +31,7 @@ type Payment = {
   created_at: string;
   email: string;
   contact: string;
+  payment_details?: any;
 };
 
 // Add this status mapping
@@ -351,9 +353,9 @@ export default function Dashboard() {
                   <TableBody>
                     {paymentHistory.map((payment: Payment) => (
                       <TableRow key={payment.id}>
-                        <TableCell className="font-medium">{payment.order_id}</TableCell>
+                        <TableCell className="font-medium">{payment.order_id || payment.razorpay_payment_id}</TableCell>
                         <TableCell className="font-medium">
-                          {payment.currency === 'INR' ? '₹' : payment.currency === 'USD' ? '$' : '€'}
+                          {getCurrencySymbol(payment.currency)}
                           {payment.amount} {payment.currency}
                         </TableCell>
                         <TableCell>
