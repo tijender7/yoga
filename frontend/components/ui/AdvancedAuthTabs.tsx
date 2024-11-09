@@ -354,9 +354,10 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
   // Authentication State Listener
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && session?.user?.app_metadata?.provider === 'google') {
         setAlert({ type: 'success', message: 'Successfully signed in with Google!' })
-        // Update your app state, redirect user, etc.
+      } else if (event === 'SIGNED_IN') {
+        setAlert({ type: 'success', message: 'Email verified successfully! You can now sign in.' })
       }
     })
 
