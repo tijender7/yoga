@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Suspense } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,11 +11,20 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff, AlertCircle, Check, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { AuthError } from '@supabase/supabase-js'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import TermsModal from '@/components/legal/TermsModal'
 
-export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
-  const [activeTab, setActiveTab] = useState<string>(defaultTab)
+export default function AdvancedAuthTabs() {
+  return (
+    <Suspense fallback={<div>Loading auth...</div>}>
+      <AuthContent />
+    </Suspense>
+  );
+}
+
+function AuthContent() {
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get('tab') || 'signin')
   const [showPassword, setShowPassword] = useState(false)
   const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info', message: string } | null>(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
@@ -37,8 +46,8 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
 
   // Add this useEffect to handle tab changes
   useEffect(() => {
-    setActiveTab(defaultTab)
-  }, [defaultTab])
+    setActiveTab(searchParams.get('tab') || 'signin')
+  }, [searchParams])
 
   // Add this function to handle tab changes
   const handleTabChange = (value: string) => {
@@ -377,23 +386,23 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
   return (
     <div className="w-full max-w-md mx-auto space-y-6 bg-white p-8 rounded-lg shadow-md">
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6 bg-transparent">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger 
             value="signin" 
-            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
+            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary"
           >
             Sign In
           </TabsTrigger>
           <TabsTrigger 
             value="signup" 
-            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all bg-transparent hover:bg-transparent focus:bg-transparent"
+            className="text-lg font-medium py-2 text-gray-600 data-[state=active]:text-white data-[state=active]:bg-primary"
           >
             Sign Up
           </TabsTrigger>
         </TabsList>
         {/* Sign In Tab */}
         <TabsContent value="signin">
-          <form onSubmit={handleSubmit} className="space-y-4" aria-label="Sign In Form">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2 relative">
               <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">Email</Label>
               <Input 
@@ -401,75 +410,43 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
                 name="email" 
                 type="email" 
                 required 
-                className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900" 
-                aria-invalid={!!formErrors.email}
-                aria-describedby={formErrors.email ? 'signin-email-error' : undefined}
+                className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
               />
-              {formErrors.email && (
-                <p id="signin-email-error" className="text-red-500 text-xs absolute -bottom-5">
-                  {formErrors.email}
-                </p>
-              )}
             </div>
             <div className="space-y-2 relative">
               <Label htmlFor="signin-password" className="text-sm font-medium text-gray-700">Password</Label>
               <div className="relative">
-                <Input
+                <Input 
                   id="signin-password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  required
-                  className="w-full bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
                   value={signInPassword}
                   onChange={handleSignInPasswordChange}
-                  aria-invalid={!!formErrors.password}
-                  aria-describedby={formErrors.password ? 'signin-password-error' : undefined}
+                  required
+                  className="w-full pr-10 bg-white border-gray-300 focus:border-primary focus:ring-primary text-gray-900"
                 />
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                </Button>
+                  {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
+                </button>
               </div>
-              {formErrors.password && (
-                <p id="signin-password-error" className="text-red-500 text-xs absolute -bottom-5">
-                  {formErrors.password}
-                </p>
-              )}
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id="remember" 
-                checked={rememberMe} 
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)} 
-                aria-label="Remember me"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
               />
-              <label
-                htmlFor="remember"
-                className="text-sm font-medium text-gray-700 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Remember me
-              </label>
+              <label htmlFor="remember" className="text-sm text-gray-700">Remember me</label>
             </div>
-            <Button 
-              type="submit" 
-              className="w-full bg-primary text-white hover:bg-primary-dark font-medium" 
-              disabled={isLoading}
-              aria-busy={isLoading}
-            >
+            <Button type="submit" className="w-full bg-primary text-white hover:bg-primary/90" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
+                  Signing in...
                 </>
               ) : (
                 'Sign In'
@@ -480,7 +457,6 @@ export default function AdvancedAuthTabs({ defaultTab = 'signin' }) {
             variant="link" 
             className="mt-2 w-full text-primary hover:underline" 
             onClick={() => setActiveTab('forgot-password')}
-            aria-label="Forgot Password"
           >
             Forgot Password?
           </Button>
